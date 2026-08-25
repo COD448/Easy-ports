@@ -17,15 +17,18 @@
    push-buttons, coral / mint / sun accents on deep navy ink.
    ============================================================ */
 :root{
-  --bg:#eef2f8;
-  --bg-2:#e2e9f4;
-  --surface:#ffffff;
-  --surface-2:#f6f9fd;
+  /* Light ramp is deliberately off-white: no pure #fff anywhere in the
+     chrome, so large panels do not glare on a bright screen. The
+     portfolio sheets keep their own paper colours — they get printed. */
+  --bg:#e3e8f0;
+  --bg-2:#d5dce7;
+  --surface:#f1f4f9;
+  --surface-2:#e8edf4;
   --ink:#16203a;
-  --ink-2:#46567a;
-  --muted:#8494b2;
-  --line:#dbe3ef;
-  --line-2:#eaeff7;
+  --ink-2:#44546f;
+  --muted:#6f7f98;
+  --line:#ccd5e2;
+  --line-2:#dbe2ec;
 
   --brand:#f2624d;
   --brand-deep:#c9412f;
@@ -85,12 +88,12 @@ img{max-width:100%;display:block}
 
 /* playful ambient background, shared by every screen */
 .ambient{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
-.ambient .blob{position:absolute;border-radius:50%;filter:blur(60px);opacity:.5}
+.ambient .blob{position:absolute;border-radius:50%;filter:blur(60px);opacity:.32}
 .ambient .b1{width:44vw;height:44vw;left:-12vw;top:-14vw;background:var(--brand-soft)}
 .ambient .b2{width:38vw;height:38vw;right:-10vw;top:8vh;background:var(--mint-soft)}
 .ambient .b3{width:34vw;height:34vw;left:22vw;bottom:-16vw;background:var(--sun-soft)}
 .ambient .dots{
-  position:absolute;inset:0;opacity:.5;
+  position:absolute;inset:0;opacity:.4;
   background-image:radial-gradient(var(--line) 1.4px, transparent 1.4px);
   background-size:26px 26px;
 }
@@ -157,7 +160,28 @@ img{max-width:100%;display:block}
 .btnrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 
 /* ---------- screens ---------- */
-.screen{display:none;padding-bottom:70px}
+/* ---------- theme toggle ---------- */
+.themebtn{
+  display:inline-flex;align-items:center;gap:9px;cursor:pointer;white-space:nowrap;
+  font-family:var(--ui);font-weight:400;font-size:13.5px;line-height:1;
+  padding:10px 16px;border-radius:999px;
+  border:2px solid var(--line);background:var(--surface);color:var(--ink);
+  box-shadow:0 3px 0 var(--line);
+  transition:transform .12s ease, box-shadow .12s ease, border-color .16s ease, background .16s ease;
+}
+.themebtn:hover{transform:translateY(-2px);box-shadow:0 5px 0 var(--line);border-color:var(--sun-deep)}
+.themebtn:active{transform:translateY(3px);box-shadow:0 0 0 var(--line)}
+.themebtn .ic{width:20px;height:20px;flex:none;display:grid;place-items:center}
+.themebtn .ic svg{width:20px;height:20px;display:block;animation:swap .34s cubic-bezier(.2,.8,.3,1)}
+.themebtn[data-theme="light"] .ic{color:var(--sun-deep)}
+.themebtn[data-theme="dark"] .ic{color:var(--sun)}
+@keyframes swap{from{transform:rotate(-50deg) scale(.55);opacity:0}to{transform:none;opacity:1}}
+.themebtn.compact{padding:9px;gap:0}
+.themebtn.compact .lbl{display:none}
+.welcome-theme{position:absolute;top:18px;right:clamp(16px,3.2vw,32px);z-index:20}
+@media (max-width:560px){ .themebtn .lbl{display:none} .themebtn{padding:9px} }
+
+.screen{display:none;padding-bottom:70px;position:relative}
 .screen[data-on="1"]{display:block;animation:rise .34s cubic-bezier(.2,.7,.3,1) both}
 @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 
@@ -245,7 +269,7 @@ img{max-width:100%;display:block}
 .entry:last-of-type{margin-bottom:0}
 .entry-hd{display:flex;align-items:center;gap:10px;margin-bottom:13px}
 .entry-hd .n{
-  font-family:var(--strong);font-weight:600;font-size:12px;color:#fff;background:var(--ink);
+  font-family:var(--strong);font-weight:600;font-size:12px;color:var(--bg);background:var(--ink);
   width:24px;height:24px;border-radius:8px;display:grid;place-items:center;flex:none;
 }
 .entry-hd .t{font-family:var(--ui);font-size:13.5px;color:var(--ink-2);flex:1;min-width:0}
@@ -260,6 +284,48 @@ img{max-width:100%;display:block}
   transition:border-color .15s,color .15s,background .15s;
 }
 .addbtn:hover{border-color:var(--mint);color:var(--mint-deep);background:var(--mint-soft)}
+
+/* ---------- language level slider ---------- */
+.lang-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.lang-head .fld{flex:1;min-width:0}
+.pct{
+  font-family:var(--ui);font-size:13.5px;color:var(--ink);background:var(--surface);
+  border:2px solid var(--line);border-radius:999px;padding:6px 12px;min-width:62px;
+  text-align:center;font-variant-numeric:tabular-nums;flex:none;line-height:1;
+}
+.pct b{font-weight:600;color:var(--brand)}
+.lang-scale{position:relative;padding-top:19px}
+.ticks{position:absolute;top:0;left:0;right:0;height:17px;pointer-events:none}
+.ticks span{
+  position:absolute;transform:translateX(-50%);font-family:var(--ui);
+  font-size:9.5px;color:var(--muted);line-height:1;top:0;
+}
+.ticks span::after{
+  content:"";position:absolute;left:50%;top:12px;width:1px;height:5px;background:var(--line);
+}
+.rng{
+  -webkit-appearance:none;appearance:none;width:100%;height:22px;display:block;
+  background:transparent;padding:0;border:0;margin:0;cursor:pointer;
+}
+.rng::-webkit-slider-runnable-track{
+  height:8px;border-radius:99px;
+  background:linear-gradient(to right, var(--brand) var(--p,0%), var(--line) var(--p,0%));
+}
+.rng::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;
+  background:var(--brand);border:3px solid var(--surface);margin-top:-6px;
+  box-shadow:0 2px 6px rgba(22,32,58,.32);transition:transform .12s ease;
+}
+.rng::-webkit-slider-thumb:hover{transform:scale(1.12)}
+.rng::-moz-range-track{height:8px;border-radius:99px;background:var(--line)}
+.rng::-moz-range-progress{height:8px;border-radius:99px;background:var(--brand)}
+.rng::-moz-range-thumb{
+  width:20px;height:20px;border-radius:50%;background:var(--brand);
+  border:3px solid var(--surface);box-shadow:0 2px 6px rgba(22,32,58,.32);
+}
+.rng:focus-visible{outline:none}
+.rng:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 4px var(--brand-soft)}
+.rng:focus-visible::-moz-range-thumb{box-shadow:0 0 0 4px var(--brand-soft)}
 
 /* chips */
 .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:2px}
@@ -341,32 +407,70 @@ img{max-width:100%;display:block}
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .thumb-no{
-  position:absolute;top:4px;left:4px;background:var(--ink);color:#fff;border-radius:5px;
+  position:absolute;top:4px;left:4px;background:var(--ink);color:var(--bg);border-radius:5px;
   font-family:var(--strong);font-size:9px;padding:1px 5px;line-height:1.5;
 }
 
-.editbar{
-  display:flex;align-items:center;gap:9px;flex-wrap:wrap;background:var(--surface);
-  border:1px solid var(--line);border-radius:var(--r-m);padding:10px 13px;box-shadow:var(--sh-1);
-  margin-bottom:14px;position:sticky;top:70px;z-index:30;
+/* Floating tool pill — sits outside the animated screens so position:fixed
+   resolves against the viewport, and follows the page as it scrolls. */
+.toolbar{
+  position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:58;
+  display:flex;align-items:center;gap:5px;
+  background:var(--surface);border:1px solid var(--line);border-radius:999px;
+  padding:7px 10px;box-shadow:var(--sh-2);
 }
-.editbar .spacer{flex:1}
-.editbar .badge{
-  display:inline-flex;align-items:center;gap:8px;font-family:var(--ui);font-size:13px;
-  padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);
+.toolbar[hidden]{display:none}
+.toolbar button{
+  width:42px;height:42px;border-radius:50%;border:0;background:transparent;color:var(--ink);
+  display:grid;place-items:center;cursor:pointer;
+  transition:background .15s ease,color .15s ease,transform .12s ease;
 }
-.editbar .badge i{width:11px;height:11px;border-radius:50%;flex:none}
-.tgl{
-  display:inline-flex;align-items:center;gap:9px;cursor:pointer;font-family:var(--ui);font-size:13.5px;
-  padding:7px 13px;border-radius:999px;border:2px solid var(--line);background:var(--surface-2);
-  transition:all .16s;
+.toolbar button:hover{background:var(--surface-2);transform:translateY(-2px)}
+.toolbar button:active{transform:translateY(1px)}
+.toolbar button[disabled]{opacity:.32;cursor:not-allowed;transform:none}
+.toolbar button[disabled]:hover{background:transparent;transform:none}
+.toolbar .sep{width:1px;height:24px;background:var(--line);margin:0 4px;flex:none}
+.toolbar .primary{background:var(--brand);color:#fff}
+.toolbar .primary:hover{background:var(--brand);color:#fff;filter:brightness(1.08)}
+@media (max-width:520px){
+  .toolbar button{width:38px;height:38px}
 }
-.tgl:hover{border-color:var(--muted)}
-.tgl[aria-pressed="true"]{background:var(--mint-soft);border-color:var(--mint);color:var(--mint-deep)}
-.tgl .sw{width:32px;height:18px;border-radius:99px;background:var(--line);position:relative;flex:none;transition:background .18s}
-.tgl .sw::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .18s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
-.tgl[aria-pressed="true"] .sw{background:var(--mint)}
-.tgl[aria-pressed="true"] .sw::after{transform:translateX(14px)}
+
+/* download options, anchored above the download button */
+.dlmenu{
+  position:fixed;z-index:62;width:min(320px,92vw);
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-l);
+  box-shadow:var(--sh-2);padding:14px;display:flex;flex-direction:column;gap:11px;
+}
+.dlmenu[hidden]{display:none}
+.dl-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.dl-lab{font-family:var(--ui);font-size:12px;color:var(--muted);flex:none;min-width:52px}
+.dl-types{display:flex;gap:5px;flex:1;min-width:0}
+.dl-types button{
+  flex:1;min-width:0;cursor:pointer;font-family:var(--ui);font-size:12.5px;
+  padding:7px 4px;border-radius:9px;border:2px solid var(--line);background:var(--surface-2);
+  color:var(--ink-2);transition:all .15s ease;
+}
+.dl-types button:hover{border-color:var(--muted)}
+.dl-types button[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:#fff}
+.dl-where{
+  flex:1;min-width:0;cursor:pointer;font-family:var(--body);font-size:12.5px;text-align:left;
+  padding:8px 11px;border-radius:10px;border:2px dashed var(--line);background:var(--surface-2);
+  color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:all .15s ease;
+}
+.dl-where:hover:not([disabled]){border-color:var(--mint);color:var(--mint-deep)}
+.dl-where[disabled]{opacity:.5;cursor:not-allowed}
+.dl-where[data-set="1"]{border-style:solid;border-color:var(--mint);color:var(--mint-deep)}
+.dl-note{font-size:11.5px;line-height:1.5;color:var(--muted);text-wrap:pretty}
+.dl-go{
+  display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;
+  font-family:var(--ui);font-size:14.5px;padding:11px;border-radius:var(--r-m);
+  border:2px solid var(--brand);background:var(--brand);color:#fff;
+  box-shadow:0 4px 0 var(--brand-deep);transition:transform .12s ease, box-shadow .12s ease;
+}
+.dl-go:hover{transform:translateY(-2px);box-shadow:0 6px 0 var(--brand-deep)}
+.dl-go:active{transform:translateY(3px);box-shadow:0 0 0 var(--brand-deep)}
+.dl-go[disabled]{opacity:.6;cursor:progress;transform:none}
 
 .stage{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--r-m);padding:clamp(10px,1.8vw,24px);overflow:hidden}
 .sheets{display:flex;flex-direction:column;gap:clamp(14px,2vw,26px);align-items:center}
@@ -376,26 +480,72 @@ img{max-width:100%;display:block}
   display:flex;justify-content:space-between;padding:0 3px 5px;
 }
 
-/* editing affordances */
-.sheet.is-edit .el{cursor:grab}
-.sheet.is-edit .el:hover{outline:1.5px dashed var(--brand);outline-offset:3px}
-.sheet.is-edit .el.is-sel{outline:2px solid var(--brand);outline-offset:3px;cursor:grabbing}
-.sheet.is-edit .el[contenteditable="true"]{outline:2px solid var(--mint);cursor:text}
-.elbar{
-  position:fixed;z-index:60;display:none;gap:4px;transform:translateY(-100%);
-  background:var(--ink);border-radius:8px;padding:4px;box-shadow:0 6px 18px rgba(0,0,0,.35);
+/* Editing affordances — always on for the finished book.
+   Every selectable thing carries data-ek: the layout blocks AND each
+   individual run of text, so no text is welded into its parent. */
+.sheet [data-ek]{transform-origin:0 0}
+.sheet.is-edit [data-ek]{cursor:grab;position:relative}
+/* outline only the innermost thing under the cursor, not its ancestors */
+.sheet.is-edit [data-ek]:hover:not(:has([data-ek]:hover)){
+  outline:1.5px dashed var(--brand);outline-offset:3px;
 }
+.sheet.is-edit [data-ek].is-sel{outline:2px solid var(--brand);outline-offset:3px;cursor:grabbing}
+.sheet.is-edit [contenteditable="true"]{outline:2px solid var(--mint);cursor:text}
+/* Resize handles ride in an overlay above the page rather than inside the
+   sheet, so the exported markup stays free of editor furniture. */
+.selbox{position:fixed;z-index:55;display:none;pointer-events:none}
+.selbox[data-on="1"]{display:block}
+.selbox i{
+  position:absolute;width:12px;height:12px;background:var(--brand);
+  border:2px solid #fff;border-radius:3px;box-shadow:0 1px 4px rgba(0,0,0,.4);
+  pointer-events:auto;
+}
+.selbox i:hover{transform:scale(1.25)}
+.selbox i[data-h="nw"]{left:-6px;top:-6px;cursor:nwse-resize}
+.selbox i[data-h="n"]{left:50%;top:-6px;margin-left:-6px;cursor:ns-resize}
+.selbox i[data-h="ne"]{right:-6px;top:-6px;cursor:nesw-resize}
+.selbox i[data-h="w"]{left:-6px;top:50%;margin-top:-6px;cursor:ew-resize}
+.selbox i[data-h="e"]{right:-6px;top:50%;margin-top:-6px;cursor:ew-resize}
+.selbox i[data-h="sw"]{left:-6px;bottom:-6px;cursor:nesw-resize}
+.selbox i[data-h="s"]{left:50%;bottom:-6px;margin-left:-6px;cursor:ns-resize}
+.selbox i[data-h="se"]{right:-6px;bottom:-6px;cursor:nwse-resize}
+.sheet.is-edit [data-bind],.sheet.is-edit [data-text]{cursor:text}
+.sheet.is-edit [data-media]{cursor:grab}
+.sheet.is-edit [data-media].is-sel{cursor:grabbing}
+/* locked from retyping, but still free to move and resize */
+.sheet.is-edit [data-pin]{cursor:grab}
+.sheet.is-edit [data-pin].is-sel{cursor:grabbing}
+.p-ghost{color:var(--f-muted)}
+.elbar{
+  position:fixed;z-index:60;display:none;gap:3px;flex-wrap:wrap;
+  max-width:min(92vw,540px);
+  background:#1b2236;border-radius:8px;padding:4px;box-shadow:0 6px 18px rgba(0,0,0,.35);
+}
+.elbar .bsep{width:1px;align-self:stretch;background:rgba(255,255,255,.18);margin:2px 3px;flex:none}
 .elbar[data-on="1"]{display:flex}
+/* caret so the menu reads as attached to the thing being edited */
+.elbar::after{
+  content:"";position:absolute;left:var(--caret,16px);width:0;height:0;
+  border-left:6px solid transparent;border-right:6px solid transparent;
+}
+.elbar[data-below="0"]::after{top:100%;border-top:6px solid #1b2236}
+.elbar[data-below="1"]::after{bottom:100%;border-bottom:6px solid #1b2236}
 .elbar button{
   border:0;background:transparent;color:#fff;cursor:pointer;font-family:var(--ui);font-size:11.5px;
   padding:4px 9px;border-radius:5px;display:flex;align-items:center;gap:5px;white-space:nowrap;
 }
 .elbar button:hover{background:rgba(255,255,255,.16)}
+.elbar button[hidden]{display:none}
 .elbar .del:hover{background:var(--brand)}
 
+/* A toast, deliberately out of flow: as an in-flow banner it shifted the page
+   down when it appeared and up again when it expired, tearing the floating
+   edit menu away from whatever it was anchored to. */
 .msg{
   display:none;align-items:center;gap:10px;background:var(--mint-soft);border:1px solid var(--mint);
-  color:var(--mint-deep);border-radius:var(--r-m);padding:11px 15px;font-size:13.5px;margin-bottom:13px;
+  color:var(--mint-deep);border-radius:var(--r-m);padding:12px 18px;font-size:13.5px;
+  position:fixed;left:50%;bottom:88px;transform:translateX(-50%);z-index:70;
+  box-shadow:var(--sh-2);max-width:min(560px,92vw);text-align:center;
 }
 .msg[data-on="1"]{display:flex}
 .msg[data-tone="warn"]{background:var(--sun-soft);border-color:var(--sun-deep);color:var(--sun-deep)}
@@ -487,8 +637,10 @@ img{max-width:100%;display:block}
 .meters{display:flex;flex-direction:column;gap:1.25cqw}
 .meter .top{display:flex;justify-content:space-between;font-size:1.55cqw;margin-bottom:.5cqw;color:var(--f-ink)}
 .meter .top em{font-style:normal;color:var(--f-muted);font-size:1.35cqw}
-.meter .bar{height:1.05cqw;border-radius:99cqw;background:var(--f-line);overflow:hidden}
-.meter .fill{height:100%;border-radius:99cqw;background:var(--f-accent)}
+.meter .bar{height:1.15cqw;border-radius:99cqw;background:var(--f-line);overflow:hidden}
+/* display:block is load-bearing — the fill is a <span>, and width/height
+   are ignored on an inline box, which renders the bar empty at every level. */
+.meter .fill{display:block;height:100%;min-width:0;border-radius:99cqw;background:var(--f-accent)}
 .meter:nth-child(even) .fill{background:var(--f-accent2)}
 
 /* tags */
@@ -510,8 +662,13 @@ img{max-width:100%;display:block}
 .ph-3x4{aspect-ratio:3/4}
 .ph-16x9{aspect-ratio:16/9}
 .phbox{display:flex;flex-direction:column;gap:.9cqw;min-width:0}
-.phbox .cap{font-size:1.4cqw;line-height:1.5;color:var(--f-ink2)}
-.phbox .cap b{font-family:var(--f-display);font-weight:600;color:var(--f-ink);display:block;font-size:1.55cqw;margin-bottom:.2cqw}
+/* each fact gets its own line: role, description and what-was-learned used to
+   run together into one unbroken block of text */
+.phbox .cap{display:flex;flex-direction:column;gap:.55cqw;font-size:1.4cqw;line-height:1.55;color:var(--f-ink2)}
+.phbox .cap b{font-family:var(--f-display);font-weight:600;color:var(--f-ink);display:block;font-size:1.55cqw}
+.cap-line{display:block}
+.cap-lab{font-style:normal;font-weight:600;color:var(--f-muted)}
+.cap-learn .cap-lab{color:var(--f-accent)}
 .pgrid{display:grid;gap:1.7cqw}
 
 /* quote / motto */
@@ -643,7 +800,7 @@ img{max-width:100%;display:block}
 
 /* ---------- print ---------- */
 @media print{
-  .ambient,.topbar,.editbar,.rail,.msg,.elbar,.sheetbox .cap{display:none !important}
+  .ambient,.topbar,.toolbar,.dlmenu,.rail,.msg,.elbar,.selbox,.sheetbox .cap{display:none !important}
   body{background:#fff}
   .screen{display:none !important}
   #screen7[data-on="1"]{display:block !important;padding:0}
@@ -682,11 +839,19 @@ img{max-width:100%;display:block}
     </button>
     <span class="spacer"></span>
     <nav class="steps" id="steps" aria-label="ขั้นตอน"></nav>
+    <button class="themebtn compact" type="button" data-theme-toggle>
+      <span class="ic"></span><span class="lbl"></span>
+    </button>
   </div>
 </header>
 
 <!-- ==================== 1 · WELCOME ==================== -->
 <section class="screen" id="screen1" data-on="1">
+  <div class="welcome-theme">
+    <button class="themebtn" type="button" data-theme-toggle>
+      <span class="ic"></span><span class="lbl"></span>
+    </button>
+  </div>
   <div class="wrap welcome">
     <div class="welcome-in">
       <div class="logo-big">
@@ -752,10 +917,10 @@ img{max-width:100%;display:block}
       </div>
       <div class="panel-bd">
         <div class="grid2">
-          <div class="fld"><label for="i-nameTh">ชื่อ–นามสกุล (ไทย)</label><input id="i-nameTh" data-k="nameTh" type="text" placeholder="ธนกฤต เลิศสกุล"></div>
-          <div class="fld"><label for="i-nameEn">ชื่อ–นามสกุล (อังกฤษ)</label><input id="i-nameEn" data-k="nameEn" type="text" placeholder="Thanakrit Lertsakul"></div>
-          <div class="fld"><label for="i-nick">ชื่อเล่น</label><input id="i-nick" data-k="nick" type="text" placeholder="ต้น"></div>
-          <div class="fld"><label for="i-bd">วัน/เดือน/ปีเกิด</label><input id="i-bd" data-k="birthday" type="text" placeholder="3 กรกฎาคม 2550"></div>
+          <div class="fld"><label for="i-nameTh">ชื่อ–นามสกุล (ไทย)</label><input id="i-nameTh" data-k="nameTh" type="text" placeholder="ใส่ข้อมูลที่นี้"></div>
+          <div class="fld"><label for="i-nameEn">ชื่อ–นามสกุล (อังกฤษ)</label><input id="i-nameEn" data-k="nameEn" type="text" placeholder="ใส่ข้อมูลที่นี้"></div>
+          <div class="fld"><label for="i-nick">ชื่อเล่น</label><input id="i-nick" data-k="nick" type="text" placeholder="ใส่ข้อมูลที่นี้"></div>
+          <div class="fld"><label for="i-bd">วัน/เดือน/ปีเกิด</label><input id="i-bd" data-k="birthday" type="text" placeholder="ใส่ข้อมูลที่นี้"></div>
           <div class="fld span2">
             <label>รูปถ่ายของคุณ <span class="en">· ใช้บนปกและหน้าประวัติ</span></label>
             <div class="up" data-up="photo">
@@ -783,10 +948,10 @@ img{max-width:100%;display:block}
       </div>
       <div class="panel-bd">
         <div class="grid2">
-          <div class="fld"><label for="i-school">โรงเรียน / สถานศึกษา</label><input id="i-school" data-k="school" type="text" placeholder="โรงเรียนสวนกุหลาบวิทยาลัย"></div>
-          <div class="fld"><label for="i-plan">แผนการเรียน</label><input id="i-plan" data-k="plan" type="text" placeholder="วิทยาศาสตร์–คณิตศาสตร์"></div>
-          <div class="fld"><label for="i-facw">คณะที่ต้องการ</label><input id="i-facw" data-k="facultyWant" type="text" placeholder="คณะวิศวกรรมศาสตร์"></div>
-          <div class="fld"><label for="i-majw">สาขาวิชา</label><input id="i-majw" data-k="majorWant" type="text" placeholder="วิศวกรรมคอมพิวเตอร์"></div>
+          <div class="fld"><label for="i-school">โรงเรียน / สถานศึกษา</label><input id="i-school" data-k="school" type="text" placeholder="ใส่ข้อมูลที่นี้"></div>
+          <div class="fld"><label for="i-plan">แผนการเรียน</label><input id="i-plan" data-k="plan" type="text" placeholder="ใส่ข้อมูลที่นี้"></div>
+          <div class="fld"><label for="i-facw">คณะที่ต้องการ</label><input id="i-facw" data-k="facultyWant" type="text" placeholder="ใส่ข้อมูลที่นี้"></div>
+          <div class="fld"><label for="i-majw">สาขาวิชา</label><input id="i-majw" data-k="majorWant" type="text" placeholder="ใส่ข้อมูลที่นี้"></div>
           <div class="fld span2">
             <label>ตราโรงเรียน / มหาวิทยาลัย <span class="en">· ไม่ใส่ก็ได้</span></label>
             <div class="up" data-up="logo">
@@ -830,11 +995,11 @@ img{max-width:100%;display:block}
       </div>
       <div class="panel-bd">
         <div class="grid2">
-          <div class="fld"><label for="i-email">อีเมล</label><input id="i-email" data-k="email" type="text" placeholder="thanakrit.l@example.ac.th"></div>
-          <div class="fld"><label for="i-phone">เบอร์โทรศัพท์</label><input id="i-phone" data-k="phone" type="text" placeholder="08x-xxx-xxxx"></div>
-          <div class="fld"><label for="i-line">LINE ID</label><input id="i-line" data-k="lineId" type="text" placeholder="@thanakrit"></div>
-          <div class="fld"><label for="i-ig">Instagram / Facebook</label><input id="i-ig" data-k="social" type="text" placeholder="ig: thanakrit.l"></div>
-          <div class="fld span2"><label for="i-url">พอร์ตโฟลิโอออนไลน์ / เว็บไซต์ <span class="en">· ถ้ามี</span></label><input id="i-url" data-k="portfolioUrl" type="text" placeholder="tl-studio.works"></div>
+          <div class="fld"><label for="i-email">อีเมล</label><input id="i-email" data-k="email" type="text" placeholder="ใส่ข้อมูลที่นี้"></div>
+          <div class="fld"><label for="i-phone">เบอร์โทรศัพท์</label><input id="i-phone" data-k="phone" type="text" placeholder="ใส่ข้อมูลที่นี้"></div>
+          <div class="fld"><label for="i-line">LINE ID</label><input id="i-line" data-k="lineId" type="text" placeholder="ใส่ข้อมูลที่นี้"></div>
+          <div class="fld"><label for="i-ig">Instagram / Facebook</label><input id="i-ig" data-k="social" type="text" placeholder="ใส่ข้อมูลที่นี้"></div>
+          <div class="fld span2"><label for="i-url">พอร์ตโฟลิโอออนไลน์ / เว็บไซต์ <span class="en">· ถ้ามี</span></label><input id="i-url" data-k="portfolioUrl" type="text" placeholder="ใส่ข้อมูลที่นี้"></div>
         </div>
       </div>
     </section>
@@ -848,9 +1013,9 @@ img{max-width:100%;display:block}
       </div>
       <div class="panel-bd">
         <div class="grid3">
-          <div class="fld"><label for="i-hard">Hard skills <span class="en">· คั่นด้วยจุลภาค</span></label><textarea id="i-hard" data-k="hardSkills" placeholder="เขียนโปรแกรม, วงจรไฟฟ้า, เขียนแบบ"></textarea></div>
-          <div class="fld"><label for="i-soft">Soft skills</label><textarea id="i-soft" data-k="softSkills" placeholder="ทำงานเป็นทีม, นำเสนอ, แก้ปัญหา"></textarea></div>
-          <div class="fld"><label for="i-sw">โปรแกรมที่ใช้ได้</label><textarea id="i-sw" data-k="software" placeholder="Python, AutoCAD, Figma"></textarea></div>
+          <div class="fld"><label for="i-hard">Hard skills <span class="en">· คั่นด้วยจุลภาค</span></label><textarea id="i-hard" data-k="hardSkills" placeholder="ใส่ข้อมูลที่นี้"></textarea></div>
+          <div class="fld"><label for="i-soft">Soft skills</label><textarea id="i-soft" data-k="softSkills" placeholder="ใส่ข้อมูลที่นี้"></textarea></div>
+          <div class="fld"><label for="i-sw">โปรแกรมที่ใช้ได้</label><textarea id="i-sw" data-k="software" placeholder="ใส่ข้อมูลที่นี้"></textarea></div>
         </div>
         <div style="margin-top:16px">
           <label style="font-family:var(--ui);font-size:12.5px;color:var(--ink-2)">ภาษา <span class="en" style="color:var(--muted);font-size:11px">· ลากแถบเพื่อกำหนดระดับ</span></label>
@@ -869,9 +1034,9 @@ img{max-width:100%;display:block}
       </div>
       <div class="panel-bd">
         <div class="grid2">
-          <div class="fld"><label for="i-hob">งานอดิเรก <span class="en">· คั่นด้วยจุลภาค</span></label><input id="i-hob" data-k="hobbies" type="text" placeholder="ถ่ายภาพ, วิ่ง, ต่อโมเดล"></div>
-          <div class="fld"><label for="i-motto">คติประจำใจ / แนะนำตัวสั้น ๆ</label><input id="i-motto" data-k="motto" type="text" placeholder="ลงมือทำก่อน แล้วค่อยทำให้ดีขึ้น"></div>
-          <div class="fld span2"><label for="i-about">แนะนำตัว <span class="en">· 2–4 บรรทัด</span></label><textarea id="i-about" data-k="about" placeholder="นักเรียนชั้น ม.6 สายวิทย์–คณิต สนใจงานที่ได้ลงมือสร้างจริง..."></textarea></div>
+          <div class="fld"><label for="i-hob">งานอดิเรก <span class="en">· คั่นด้วยจุลภาค</span></label><input id="i-hob" data-k="hobbies" type="text" placeholder="ใส่ข้อมูลที่นี้"></div>
+          <div class="fld"><label for="i-motto">คติประจำใจ / แนะนำตัวสั้น ๆ</label><input id="i-motto" data-k="motto" type="text" placeholder="ใส่ข้อมูลที่นี้"></div>
+          <div class="fld span2"><label for="i-about">แนะนำตัว <span class="en">· 2–4 บรรทัด</span></label><textarea id="i-about" data-k="about" placeholder="ใส่ข้อมูลที่นี้"></textarea></div>
         </div>
       </div>
     </section>
@@ -894,8 +1059,8 @@ img{max-width:100%;display:block}
               <option value="ประกาศนียบัตรวิชาชีพชั้นสูง (ปวส.)">ประกาศนียบัตรวิชาชีพชั้นสูง (ปวส.)</option>
             </select>
           </div>
-          <div class="fld"><label for="i-gpax">เกรดเฉลี่ยสะสม (GPAX)</label><input id="i-gpax" data-k="gpax" type="text" placeholder="3.72"></div>
-          <div class="fld"><label for="i-year">ชั้นปีปัจจุบัน</label><input id="i-year" data-k="gradeYear" type="text" placeholder="ม.6"></div>
+          <div class="fld"><label for="i-gpax">เกรดเฉลี่ยสะสม (GPAX)</label><input id="i-gpax" data-k="gpax" type="text" placeholder="ใส่ข้อมูลที่นี้"></div>
+          <div class="fld"><label for="i-year">ชั้นปีปัจจุบัน</label><input id="i-year" data-k="gradeYear" type="text" placeholder="ใส่ข้อมูลที่นี้"></div>
         </div>
         <div style="margin-top:16px">
           <label style="font-family:var(--ui);font-size:12.5px;color:var(--ink-2)">เกรดวิชาที่เกี่ยวข้อง <span class="en" style="color:var(--muted);font-size:11px">· เลือกเฉพาะวิชาที่ตรงกับคณะ</span></label>
@@ -982,7 +1147,7 @@ img{max-width:100%;display:block}
         <h2>คำนำ<span class="en">PREFACE · เว้นว่างไว้ระบบจะเขียนให้</span></h2>
       </div>
       <div class="panel-bd">
-        <div class="fld"><label for="i-pref">คำนำของเล่ม</label><textarea id="i-pref" data-k="preface" style="min-height:110px" placeholder="เว้นว่างไว้ ระบบจะเขียนคำนำจากข้อมูลของคุณให้อัตโนมัติ"></textarea></div>
+        <div class="fld"><label for="i-pref">คำนำของเล่ม</label><textarea id="i-pref" data-k="preface" style="min-height:110px" placeholder="ใส่ข้อมูลที่นี้"></textarea></div>
       </div>
     </section>
 
@@ -1002,19 +1167,7 @@ img{max-width:100%;display:block}
     <div class="hd" style="max-width:none">
       <span class="eyebrow">ขั้นที่ 6 · Your portfolio</span>
       <h1>พอร์ตโฟลิโอของคุณ</h1>
-      <p class="sub">14 หน้า พร้อมพิมพ์ขนาด A4 — เปิดโหมดแก้ไขเพื่อย้าย ลบ หรือพิมพ์ทับข้อความได้ทุกชิ้นก่อนบันทึก</p>
-    </div>
-
-    <div class="msg" id="msg" role="status" aria-live="polite"><span id="msgText"></span></div>
-
-    <div class="editbar">
-      <span class="badge" id="facBadge"><i></i><span>—</span></span>
-      <button class="tgl" id="btnEdit" type="button" aria-pressed="false"><span class="sw"></span>โหมดแก้ไข</button>
-      <button class="btn btn-sm btn-ghost" id="btnReset" type="button">คืนค่าหน้าเดิม</button>
-      <span class="spacer"></span>
-      <button class="btn btn-sm" id="btnBackEdit" type="button">แก้ไขข้อมูล</button>
-      <button class="btn btn-sm" id="btnPrint" type="button">พิมพ์</button>
-      <button class="btn btn-sm btn-primary" id="btnExport" type="button">ดาวน์โหลด</button>
+      <p class="sub">14 หน้า พร้อมพิมพ์ขนาด A4 — แก้ไขได้ทันที คลิกเพื่อเลือก ลากเพื่อย้าย ลากมุมขวาล่างเพื่อย่อ–ขยาย และดับเบิลคลิกเพื่อพิมพ์ทับข้อความ ข้อความที่แก้จะอัปเดตกลับไปยังหน้ากรอกข้อมูลด้วย</p>
     </div>
 
     <div class="work">
@@ -1024,12 +1177,86 @@ img{max-width:100%;display:block}
       </div>
     </div>
   </div>
-  <div class="elbar" id="elbar">
-    <button type="button" class="mv" id="elEdit">แก้ข้อความ</button>
-    <button type="button" class="del" id="elDel">ลบ</button>
-  </div>
 </section>
 
+</div>
+
+<!-- The floating edit menu lives outside .stack on purpose: the screens carry
+     an entrance animation, which leaves an identity transform on them, and a
+     transformed ancestor becomes the containing block for position:fixed —
+     which would peg this menu to the section instead of the viewport. -->
+<div class="msg" id="msg" role="status" aria-live="polite"><span id="msgText"></span></div>
+
+<div class="toolbar" id="toolbar" hidden role="toolbar" aria-label="เครื่องมือแก้ไขพอร์ตโฟลิโอ">
+  <button type="button" id="btnUndo" title="ย้อนกลับ" aria-label="ย้อนกลับ">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M19 12H5M11 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <button type="button" id="btnRedo" title="ทำซ้ำ" aria-label="ทำซ้ำ">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <button type="button" id="btnReset" title="คืนค่าหน้าเดิม" aria-label="คืนค่าหน้าเดิม">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M20.5 12a8.5 8.5 0 1 1-2.8-6.3M20.5 4.2V10h-5.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <span class="sep"></span>
+  <button type="button" id="btnPrint" title="พิมพ์" aria-label="พิมพ์">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M7 9V4h10v5M7 19H5.5A2.5 2.5 0 0 1 3 16.5v-3A2.5 2.5 0 0 1 5.5 11h13A2.5 2.5 0 0 1 21 13.5v3A2.5 2.5 0 0 1 18.5 19H17M7 15h10v5H7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <button type="button" id="btnExport" class="primary" title="ดาวน์โหลด" aria-label="ดาวน์โหลด">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M12 3v12M7 11l5 5 5-5M4 20h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+</div>
+
+<div class="dlmenu" id="dlmenu" hidden role="dialog" aria-label="ตัวเลือกการดาวน์โหลด">
+  <div class="dl-row">
+    <span class="dl-lab">ชนิดไฟล์</span>
+    <div class="dl-types" id="dlTypes" role="group" aria-label="ชนิดไฟล์">
+      <button type="button" data-t="pdf"  aria-pressed="true">PDF</button>
+      <button type="button" data-t="png"  aria-pressed="false">PNG</button>
+      <button type="button" data-t="jpg"  aria-pressed="false">JPG</button>
+      <button type="button" data-t="html" aria-pressed="false">HTML</button>
+    </div>
+  </div>
+  <div class="dl-row">
+    <span class="dl-lab">ที่บันทึก</span>
+    <button type="button" class="dl-where" id="dlWhere">เลือกโฟลเดอร์…</button>
+  </div>
+  <p class="dl-note" id="dlNote"></p>
+  <button type="button" class="dl-go" id="dlGo">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M12 3v12M7 11l5 5 5-5M4 20h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    ดาวน์โหลด
+  </button>
+</div>
+
+<div class="selbox" id="selbox" aria-hidden="true">
+  <i data-h="nw"></i><i data-h="n"></i><i data-h="ne"></i>
+  <i data-h="w"></i><i data-h="e"></i>
+  <i data-h="sw"></i><i data-h="s"></i><i data-h="se"></i>
+</div>
+
+<div class="elbar" id="elbar">
+  <button type="button" id="elDown" title="ย่อ">− ย่อ</button>
+  <button type="button" id="elUp" title="ขยาย">+ ขยาย</button>
+  <span class="bsep"></span>
+  <button type="button" id="elFront" title="นำมาไว้หน้าสุด">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="3" y="10" width="9" height="9" rx="1.6" stroke="currentColor" stroke-width="1.8" opacity=".5"/>
+      <rect x="9" y="4" width="12" height="12" rx="2" fill="currentColor"/></svg>หน้า
+  </button>
+  <button type="button" id="elBack" title="ส่งไปไว้หลังสุด">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="9" y="4" width="12" height="12" rx="2" fill="currentColor" opacity=".45"/>
+      <rect x="3" y="10" width="9" height="9" rx="1.6" fill="currentColor"/>
+      <rect x="3" y="10" width="9" height="9" rx="1.6" stroke="#1b2236" stroke-width="1.4"/></svg>หลัง
+  </button>
+  <span class="bsep"></span>
+  <button type="button" id="elEdit">แก้ข้อความ</button>
+  <button type="button" class="del" id="elDel">ลบ</button>
 </div>
 <script>
 (function(){
@@ -1158,7 +1385,7 @@ img{max-width:100%;display:block}
     grades:[{subject:"",grade:""}],
     acts:[], works:[], certs:[], preface:""
   };
-  var state = { screen:1, faculty:"engineering", edit:false, edits:{}, cur:0 };
+  var state = { screen:1, faculty:"engineering", edits:{}, cur:0 };
 
   function blankAct(){ return {title:"",type:"ค่ายวิชาการ",date:"",role:"",desc:"",learned:"",photo:""}; }
   function blankWork(){ return {name:"",objective:"",tools:"",role:"",desc:"",photo:""}; }
@@ -1175,7 +1402,30 @@ img{max-width:100%;display:block}
   function tidy(s){ return String(s==null?"":s).replace(/\s+/g," ").trim(); }
   function has(s){ return !!tidy(s); }
   function csv(s){ return String(s||"").split(/[,\n]/).map(tidy).filter(Boolean); }
-  function or(v,alt){ return has(v) ? esc(tidy(v)) : '<span style="color:var(--f-muted)">'+esc(alt)+"</span>"; }
+  function or(v,alt){ return has(v) ? esc(tidy(v)) : '<span class="p-ghost">'+esc(alt)+"</span>"; }
+
+  /* data-bind ties a piece of text on the finished page back to the field it
+     came from, so retyping it on page 7 also updates the form on pages 3–6.
+     Paths: "field" · "list.2.field" · "csvField#3" (one item of a comma list) */
+  function bind(path){ return ' data-bind="'+path+'"'; }
+
+  function writeBind(path, text){
+    var m;
+    if(!path) return false;
+    if((m = path.match(/^([A-Za-z]+)#(\d+)$/))){
+      var arr = csv(D[m[1]]); if(!arr.length && !text) return false;
+      arr[Number(m[2])] = text; D[m[1]] = arr.filter(Boolean).join(", "); return true;
+    }
+    if((m = path.match(/^([A-Za-z]+)\.(\d+)\.([A-Za-z]+)$/))){
+      var L = D[m[1]], i = Number(m[2]);
+      if(L && L[i] && L[i].hasOwnProperty(m[3])){ L[i][m[3]] = text; return true; }
+      return false;
+    }
+    if(Object.prototype.hasOwnProperty.call(D, path) && typeof D[path] === "string"){
+      D[path] = text; return true;
+    }
+    return false;
+  }
 
   var EK = 0;
   function el(cls, inner){ return '<div class="el '+cls+'">'+inner+"</div>"; }
@@ -1200,11 +1450,11 @@ img{max-width:100%;display:block}
     return '<div class="cover">'+
       el("cover-top",
         (D.logo ? '<img class="cover-logo" src="'+D.logo+'" alt="">' : "")+
-        '<span class="cover-school">'+or(D.school,"โรงเรียน / สถานศึกษา")+"</span>")+
+        '<span class="cover-school"'+bind("school")+">"+or(D.school,"โรงเรียน / สถานศึกษา")+"</span>")+
       el("cover-word","PORTFOLIO")+
       el("cover-photo", D.photo ? '<img src="'+D.photo+'" alt="">' : "<span>พื้นที่สำหรับรูปถ่าย</span>")+
       '<div class="cover-foot">'+
-        el("cover-name", esc(nm)+sub)+
+        el("cover-name", '<span'+bind(has(D.nameTh)?"nameTh":"nameEn")+">"+esc(nm)+"</span>"+sub)+
         el("cover-major", major ? esc(major) : (has(D.plan)? esc(D.plan) : "คณะและสาขาที่ต้องการยื่น"))+
       "</div></div>";
   }
@@ -1240,13 +1490,13 @@ img{max-width:100%;display:block}
 
   function sProfile(){
     var kv = [
-      ["ชื่อ–นามสกุล", has(D.nameTh)?D.nameTh:D.nameEn],
-      ["ชื่อเล่น", D.nick],
-      ["วันเกิด", D.birthday],
-      ["สถานศึกษา", D.school],
-      ["แผนการเรียน", D.plan],
-      ["คณะที่ต้องการ", D.facultyWant],
-      ["สาขาวิชา", D.majorWant]
+      ["ชื่อ–นามสกุล", has(D.nameTh)?D.nameTh:D.nameEn, has(D.nameTh)?"nameTh":"nameEn"],
+      ["ชื่อเล่น", D.nick, "nick"],
+      ["วันเกิด", D.birthday, "birthday"],
+      ["สถานศึกษา", D.school, "school"],
+      ["แผนการเรียน", D.plan, "plan"],
+      ["คณะที่ต้องการ", D.facultyWant, "facultyWant"],
+      ["สาขาวิชา", D.majorWant, "majorWant"]
     ];
     return '<div class="s-body">'+head(1,"ประวัติส่วนตัว","Personal Profile")+
       '<div class="p-cols c-38 p-fill">'+
@@ -1255,45 +1505,53 @@ img{max-width:100%;display:block}
           (D.logo?'<div style="display:flex;align-items:center;gap:1cqw;margin-top:.6cqw"><img src="'+D.logo+'" alt="" style="width:6.5cqw;height:6.5cqw;object-fit:contain"><span class="cap">'+or(D.school,"")+"</span></div>":""))+
         '<div class="p-rows">'+
           el("kv", kv.map(function(r){
-            return '<div class="row"><span class="k">'+esc(r[0])+'</span><span class="v">'+or(r[1],"—")+"</span></div>";
+            return '<div class="row"><span class="k">'+esc(r[0])+'</span><span class="v"'+bind(r[2])+">"+
+              or(r[1],"—")+"</span></div>";
           }).join(""))+
-          el("p-card tint",'<span class="p-lab">แนะนำตัว</span><p class="p-body">'+or(D.about,"เขียนแนะนำตัวสั้น ๆ 2–4 บรรทัด")+"</p>")+
+          el("p-card tint",'<span class="p-lab">แนะนำตัว</span><p class="p-body"'+bind("about")+">"+
+            or(D.about,"เขียนแนะนำตัวสั้น ๆ 2–4 บรรทัด")+"</p>")+
         "</div>"+
       "</div></div>";
   }
 
   function sContact(){
     var rows = [
-      ["อีเมล", D.email],["โทรศัพท์", D.phone],["LINE ID", D.lineId],
-      ["โซเชียลมีเดีย", D.social],["พอร์ตโฟลิโอออนไลน์", D.portfolioUrl]
+      ["อีเมล", D.email, "email"],["โทรศัพท์", D.phone, "phone"],["LINE ID", D.lineId, "lineId"],
+      ["โซเชียลมีเดีย", D.social, "social"],["พอร์ตโฟลิโอออนไลน์", D.portfolioUrl, "portfolioUrl"]
     ];
     return '<div class="s-body">'+head(2,"ข้อมูลติดต่อ","Contact &amp; Online")+
       '<div class="p-rows p-fill">'+
         el("p-card",'<span class="p-lab">ช่องทางติดต่อ</span>'+
           '<div class="kv">'+rows.map(function(r){
-            return '<div class="row"><span class="k">'+esc(r[0])+'</span><span class="v">'+or(r[1],"—")+"</span></div>";
+            return '<div class="row"><span class="k">'+esc(r[0])+'</span><span class="v"'+bind(r[2])+">"+
+              or(r[1],"—")+"</span></div>";
           }).join("")+"</div>")+
         el("p-card tint",'<span class="p-lab">งานอดิเรก</span>'+
           (csv(D.hobbies).length
-            ? '<ul class="tags">'+csv(D.hobbies).map(function(h){return "<li>"+esc(h)+"</li>";}).join("")+"</ul>"
-            : '<p class="p-small" style="color:var(--f-muted)">ยังไม่ได้ระบุงานอดิเรก</p>'))+
-        el("quote", esc(tidy(D.motto)||"คติประจำใจของคุณจะแสดงตรงนี้")+
+            ? '<ul class="tags">'+csv(D.hobbies).map(function(h,i){
+                return "<li"+bind("hobbies#"+i)+">"+esc(h)+"</li>";
+              }).join("")+"</ul>"
+            : '<p class="p-small p-ghost"'+bind("hobbies")+">ยังไม่ได้ระบุงานอดิเรก</p>"))+
+        el("quote", '<span'+bind("motto")+">"+
+          (has(D.motto)?esc(tidy(D.motto)):'<span class="p-ghost">คติประจำใจของคุณจะแสดงตรงนี้</span>')+"</span>"+
           "<em>"+esc(has(D.nameTh)?D.nameTh:(D.nameEn||""))+"</em>")+
       "</div></div>";
   }
 
-  function skillCard(lab, str, alt){
+  function skillCard(lab, str, alt, key){
     var a = csv(str);
     return el("p-card",'<span class="p-lab">'+esc(lab)+"</span>"+
-      (a.length ? '<ul class="tags">'+a.map(function(s){return "<li>"+esc(s)+"</li>";}).join("")+"</ul>"
-                : '<p class="p-small" style="color:var(--f-muted)">'+esc(alt)+"</p>"));
+      (a.length ? '<ul class="tags">'+a.map(function(s,i){
+                    return "<li"+bind(key+"#"+i)+">"+esc(s)+"</li>";
+                  }).join("")+"</ul>"
+                : '<p class="p-small p-ghost"'+bind(key)+">"+esc(alt)+"</p>"));
   }
   function sSkills(){
     return '<div class="s-body">'+head(3,"ทักษะและโปรแกรม","Skills &amp; Software")+
       '<div class="p-rows p-fill">'+
-        skillCard("Hard skills · ทักษะเชิงเทคนิค", D.hardSkills, "ยังไม่ได้ระบุ")+
-        skillCard("Soft skills · ทักษะเชิงพฤติกรรม", D.softSkills, "ยังไม่ได้ระบุ")+
-        skillCard("Software · โปรแกรมที่ใช้ได้", D.software, "ยังไม่ได้ระบุ")+
+        skillCard("Hard skills · ทักษะเชิงเทคนิค", D.hardSkills, "ยังไม่ได้ระบุ", "hardSkills")+
+        skillCard("Soft skills · ทักษะเชิงพฤติกรรม", D.softSkills, "ยังไม่ได้ระบุ", "softSkills")+
+        skillCard("Software · โปรแกรมที่ใช้ได้", D.software, "ยังไม่ได้ระบุ", "software")+
       "</div></div>";
   }
 
@@ -1304,11 +1562,12 @@ img{max-width:100%;display:block}
         el("p-card",'<span class="p-lab">ความสามารถทางภาษา</span>'+
           (ms.length ? '<div class="meters">'+ms.map(function(l){
             var lv = Math.max(0,Math.min(100,Number(l.level)||0));
-            return '<div class="meter"><div class="top"><span>'+esc(l.name)+"</span><em>"+lv+
-              '%</em></div><div class="bar"><span class="fill" style="width:'+lv+'%"></span></div></div>';
-          }).join("")+"</div>" : '<p class="p-small" style="color:var(--f-muted)">ยังไม่ได้เพิ่มภาษา</p>'))+
-        el("p-card tint",'<span class="p-lab">แนะนำตัว</span><p class="p-body">'+or(D.about,"—")+"</p>")+
-        el("quote", esc(tidy(D.motto)||"—")+"<em>คติประจำใจ</em>")+
+            var idx = D.langs.indexOf(l);
+            return '<div class="meter"><div class="top"><span'+bind("langs."+idx+".name")+">"+esc(l.name)+
+              "</span><em>"+lv+'%</em></div><div class="bar"><span class="fill" style="width:'+lv+'%"></span></div></div>';
+          }).join("")+"</div>" : '<p class="p-small p-ghost">ยังไม่ได้เพิ่มภาษา</p>'))+
+        el("p-card tint",'<span class="p-lab">แนะนำตัว</span><p class="p-body"'+bind("about")+">"+or(D.about,"—")+"</p>")+
+        el("quote", '<span'+bind("motto")+">"+or(D.motto,"—")+"</span><em>คติประจำใจ</em>")+
       "</div></div>";
   }
 
@@ -1318,31 +1577,36 @@ img{max-width:100%;display:block}
       '<div class="p-rows p-fill">'+
         el("p-cols c-2",
           '<div class="p-card"><span class="p-lab">ระดับการศึกษา</span>'+
-            '<div class="kv"><div class="row"><span class="k">ระดับ</span><span class="v">'+or(D.eduLevel,"—")+"</span></div>"+
-            '<div class="row"><span class="k">ชั้นปี</span><span class="v">'+or(D.gradeYear,"—")+"</span></div>"+
-            '<div class="row"><span class="k">สถานศึกษา</span><span class="v">'+or(D.school,"—")+"</span></div>"+
-            '<div class="row"><span class="k">แผนการเรียน</span><span class="v">'+or(D.plan,"—")+"</span></div></div></div>"+
+            '<div class="kv"><div class="row"><span class="k">ระดับ</span><span class="v"'+bind("eduLevel")+">"+or(D.eduLevel,"—")+"</span></div>"+
+            '<div class="row"><span class="k">ชั้นปี</span><span class="v"'+bind("gradeYear")+">"+or(D.gradeYear,"—")+"</span></div>"+
+            '<div class="row"><span class="k">สถานศึกษา</span><span class="v"'+bind("school")+">"+or(D.school,"—")+"</span></div>"+
+            '<div class="row"><span class="k">แผนการเรียน</span><span class="v"'+bind("plan")+">"+or(D.plan,"—")+"</span></div></div></div>"+
           '<div class="p-card tint" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">'+
             '<span class="p-lab">เกรดเฉลี่ยสะสม</span>'+
-            '<div style="font-family:var(--f-display);font-size:11cqw;line-height:1;color:var(--f-accent);font-weight:700">'+
+            '<div'+bind("gpax")+' style="font-family:var(--f-display);font-size:11cqw;line-height:1;color:var(--f-accent);font-weight:700">'+
               esc(tidy(D.gpax)||"—")+"</div><span class=\"p-micro\" style=\"margin-top:.8cqw\">GPAX</span></div>")+
         el("p-card",'<span class="p-lab">เกรดวิชาที่เกี่ยวข้อง</span>'+
           (gs.length ? '<div class="kv">'+gs.map(function(g){
-              return '<div class="row"><span class="k">'+esc(g.subject)+'</span><span class="v">'+or(g.grade,"—")+"</span></div>";
+              var gi = D.grades.indexOf(g);
+              return '<div class="row"><span class="k"'+bind("grades."+gi+".subject")+">"+esc(g.subject)+
+                '</span><span class="v"'+bind("grades."+gi+".grade")+">"+or(g.grade,"—")+"</span></div>";
             }).join("")+"</div>"
-          : '<p class="p-small" style="color:var(--f-muted)">ยังไม่ได้เพิ่มวิชา</p>'))+
+          : '<p class="p-small p-ghost">ยังไม่ได้เพิ่มวิชา</p>'))+
       "</div></div>";
   }
 
   function actCard(a){
+    var i = D.acts.indexOf(a);
     return el("phbox",
       ph(a.photo,"พื้นที่สำหรับรูปกิจกรรม","ph-4x3")+
-      '<div class="cap"><b>'+or(a.title,"ชื่อกิจกรรม")+"</b>"+
-      (has(a.date)||has(a.type) ? '<span class="p-micro" style="display:block;margin-bottom:.3cqw">'+
+      '<div class="cap"><b'+bind("acts."+i+".title")+">"+or(a.title,"ชื่อกิจกรรม")+"</b>"+
+      (has(a.date)||has(a.type) ? '<span class="p-micro cap-line">'+
         esc([tidy(a.type),tidy(a.date)].filter(Boolean).join(" · "))+"</span>" : "")+
-      (has(a.role) ? "<b style=\"font-weight:400;font-size:1.4cqw;display:inline\">บทบาท: </b>"+esc(tidy(a.role))+" " : "")+
-      (has(a.desc) ? esc(tidy(a.desc)) : "")+
-      (has(a.learned) ? '<span style="display:block;margin-top:.5cqw;color:var(--f-accent)">สิ่งที่ได้เรียนรู้: </span>'+esc(tidy(a.learned)) : "")+
+      (has(a.role) ? '<span class="cap-line"><em class="cap-lab">บทบาท:</em> '+
+        "<span"+bind("acts."+i+".role")+">"+esc(tidy(a.role))+"</span></span>" : "")+
+      (has(a.desc) ? '<span class="cap-line"'+bind("acts."+i+".desc")+">"+esc(tidy(a.desc))+"</span>" : "")+
+      (has(a.learned) ? '<span class="cap-line cap-learn"><em class="cap-lab">สิ่งที่ได้เรียนรู้:</em> '+
+        "<span"+bind("acts."+i+".learned")+">"+esc(tidy(a.learned))+"</span></span>" : "")+
       "</div>");
   }
   function actPage(no, th, en, items, emptyMsg){
@@ -1375,14 +1639,15 @@ img{max-width:100%;display:block}
       '<div class="p-rows p-fill">'+
         el("ph-wrap", ph(w.photo,"พื้นที่สำหรับภาพผลงาน","ph-16x9"))+
         el("p-card",
-          '<div style="font-family:var(--f-display);font-size:3cqw;font-weight:600;line-height:1.25;margin-bottom:1cqw">'+
+          '<div'+bind("works.0.name")+' style="font-family:var(--f-display);font-size:3cqw;font-weight:600;line-height:1.25;margin-bottom:1cqw">'+
             or(w.name,"ชื่อผลงาน")+"</div>"+
           '<div class="kv">'+
-            '<div class="row"><span class="k">โจทย์ / วัตถุประสงค์</span><span class="v">'+or(w.objective,"—")+"</span></div>"+
-            '<div class="row"><span class="k">เครื่องมือที่ใช้</span><span class="v">'+or(w.tools,"—")+"</span></div>"+
-            '<div class="row"><span class="k">บทบาทของฉัน</span><span class="v">'+or(w.role,"—")+"</span></div>"+
+            '<div class="row"><span class="k">โจทย์ / วัตถุประสงค์</span><span class="v"'+bind("works.0.objective")+">"+or(w.objective,"—")+"</span></div>"+
+            '<div class="row"><span class="k">เครื่องมือที่ใช้</span><span class="v"'+bind("works.0.tools")+">"+or(w.tools,"—")+"</span></div>"+
+            '<div class="row"><span class="k">บทบาทของฉัน</span><span class="v"'+bind("works.0.role")+">"+or(w.role,"—")+"</span></div>"+
           "</div>")+
-        el("p-card tint",'<span class="p-lab">รายละเอียด</span><p class="p-body">'+or(w.desc,"อธิบายสั้น ๆ ว่างานนี้ทำอะไร แก้ปัญหาอะไร และผลเป็นอย่างไร")+"</p>")+
+        el("p-card tint",'<span class="p-lab">รายละเอียด</span><p class="p-body"'+bind("works.0.desc")+">"+
+          or(w.desc,"อธิบายสั้น ๆ ว่างานนี้ทำอะไร แก้ปัญหาอะไร และผลเป็นอย่างไร")+"</p>")+
       "</div></div>";
   }
 
@@ -1392,11 +1657,12 @@ img{max-width:100%;display:block}
     if(ws.length){
       body = '<div class="pgrid p-fill" style="grid-template-columns:repeat(2,minmax(0,1fr))">'+
         ws.slice(0,4).map(function(w){
+          var wi = D.works.indexOf(w);
           return el("phbox", ph(w.photo,"พื้นที่สำหรับภาพผลงาน","ph-4x3")+
-            '<div class="cap"><b>'+or(w.name,"ชื่อผลงาน")+"</b>"+
-            (has(w.tools)?'<span class="p-micro" style="display:block">'+esc(tidy(w.tools))+"</span>":"")+
-            (has(w.role)?"บทบาท: "+esc(tidy(w.role))+" ":"")+
-            (has(w.desc)?esc(tidy(w.desc)):"")+"</div>");
+            '<div class="cap"><b'+bind("works."+wi+".name")+">"+or(w.name,"ชื่อผลงาน")+"</b>"+
+            (has(w.tools)?'<span class="p-micro cap-line"'+bind("works."+wi+".tools")+">"+esc(tidy(w.tools))+"</span>":"")+
+            (has(w.role)?'<span class="cap-line"><em class="cap-lab">บทบาท:</em> <span'+bind("works."+wi+".role")+">"+esc(tidy(w.role))+"</span></span>":"")+
+            (has(w.desc)?'<span class="cap-line"'+bind("works."+wi+".desc")+">"+esc(tidy(w.desc))+"</span>":"")+"</div>");
         }).join("")+"</div>";
     } else {
       body = '<div class="pgrid p-fill" style="grid-template-columns:repeat(2,minmax(0,1fr))">'+
@@ -1413,10 +1679,14 @@ img{max-width:100%;display:block}
     var items = cs.length ? cs.slice(0,6) : [blankCert(),blankCert(),blankCert()];
     return '<div class="s-body">'+head(10,"เกียรติบัตรและรางวัล","Certificates &amp; Awards")+
       el("certs p-fill", items.map(function(c){
+        var ci = D.certs.indexOf(c);
+        var b = ci >= 0 ? bind("certs."+ci+".name") : "";
+        var bd = ci >= 0 ? bind("certs."+ci+".date") : "";
         return '<div class="cert">'+
           '<div class="im">'+(c.photo?'<img src="'+c.photo+'" alt="">':"<span>พื้นที่สำหรับภาพเกียรติบัตร</span>")+"</div>"+
-          '<div class="nm">'+or(c.name,"ชื่อรางวัล / เกียรติบัตร")+"</div>"+
-          '<div class="dt">'+esc([tidy(c.level),tidy(c.date)].filter(Boolean).join(" · ")||"ระดับ · วันที่ได้รับ")+"</div></div>";
+          '<div class="nm"'+b+">"+or(c.name,"ชื่อรางวัล / เกียรติบัตร")+"</div>"+
+          '<div class="dt"><span>'+esc(tidy(c.level)||"ระดับ")+'</span> · <span'+bd+">"+
+            esc(tidy(c.date)||"วันที่ได้รับ")+"</span></div></div>";
       }).join(""))+"</div>";
   }
 
@@ -1470,27 +1740,186 @@ img{max-width:100%;display:block}
   }
 
   function renderBook(){
+    // every node is about to be replaced — drop anchors so the floating menu
+    // can never point at a detached element
+    sel = null; editing = null;
+    var oldBar = document.getElementById("elbar");
+    if(oldBar) oldBar.removeAttribute("data-on");
+
     var host = $("#sheets");
     host.innerHTML = PAGES.map(buildSheet).join("");
-    // stable edit keys, assigned per sheet in document order
+    // stable edit keys, assigned per sheet in document order — blocks first,
+    // then every individual run of text found inside them
     $$(".sheet", host).forEach(function(sh, si){
-      $$(".el", sh).forEach(function(e, ei){ e.dataset.ek = si+"-"+ei; });
-      if(state.edit) sh.classList.add("is-edit");
+      tagMedia(sh);                 // before tagText, so labels inside a frame
+      tagBox(sh);                   // stay part of the frame
+      tagText(sh);
+      tagPin(sh);
+      $$(".el,[data-bind],[data-text],[data-media],[data-box],[data-pin]", sh).forEach(function(e){
+        e.dataset.ek = keyFor(e, sh, si);
+      });
+      sh.classList.add("is-edit");   // the finished book is always editable
     });
     applyEdits();
     renderRail();
-    var F = FACULTIES[state.faculty];
-    var b = $("#facBadge");
-    b.querySelector("i").style.background = F.accent;
-    b.querySelector("span").textContent = F.th;
   }
 
+  /* ---------- undo / redo ----------
+     A step captures both the page edits and the form data, because retyping a
+     bound field changes both — undoing one without the other would leave the
+     book and the form disagreeing. */
+  var hist = [], hi = -1, restoring = false;
+  function snapshot(){ return JSON.stringify({ e: state.edits, d: D }); }
+  function pushHist(){
+    if(restoring) return;
+    var s = snapshot();
+    if(hi >= 0 && hist[hi] === s) return;
+    hist = hist.slice(0, hi + 1);
+    hist.push(s);
+    if(hist.length > 80){ hist.shift(); }
+    hi = hist.length - 1;
+    paintHist();
+  }
+  function applyHist(){
+    var o = JSON.parse(hist[hi]);
+    restoring = true;
+    state.edits = o.e;
+    D = o.d;
+    fillForm();
+    renderBook();
+    restoring = false;
+    paintHist();
+  }
+  function undo(){ if(hi > 0){ hi--; applyHist(); } }
+  function redo(){ if(hi < hist.length - 1){ hi++; applyHist(); } }
+  function paintHist(){
+    var u = $("#btnUndo"), r = $("#btnRedo");
+    if(u) u.disabled = hi <= 0;
+    if(r) r.disabled = hi >= hist.length - 1;
+  }
+
+  /* Marks every leaf run of text on a sheet as its own component, so a label,
+     a heading or a value can be picked up and edited on its own instead of
+     being stuck inside whatever block happens to contain it. Fields that came
+     from the form already carry data-bind and are left alone. */
+  /* Picture frames are components in their own right — the photo slots, the
+     certificate images and the school crest — so they can be moved, resized
+     and removed independently of the caption sitting next to them. */
+  var MEDIA_SEL = ".ph, .cert .im, .cover-photo, .cover-logo, .meter .bar";
+  function tagMedia(root){
+    $$(MEDIA_SEL, root).forEach(function(n){ n.setAttribute("data-media","1"); });
+  }
+
+  /* Containers that are worth grabbing as a unit but still hold editable text
+     inside them — unlike a picture frame, these must not swallow their
+     contents, so they get their own marker rather than data-media. */
+  var BOX_SEL = ".meter";
+  function tagBox(root){
+    $$(BOX_SEL, root).forEach(function(n){ n.setAttribute("data-box","1"); });
+  }
+
+  /* Locked components move and resize like anything else, but cannot be
+     retyped: the language percentage is derived from the slider on the form,
+     so typing a different number here would only make the page disagree with
+     the bar beside it. */
+  var PIN_SEL = ".meter .top em";
+  function tagPin(root){
+    $$(PIN_SEL, root).forEach(function(n){
+      n.setAttribute("data-pin","1");
+      n.removeAttribute("data-text");     // runs after tagText: revoke editing
+    });
+  }
+
+  function tagText(root){
+    $$("*", root).forEach(function(n){
+      if(n.hasAttribute("data-bind") || n.hasAttribute("data-text")) return;
+      // a form-backed field or a picture frame is one atomic component: never
+      // split its insides (its empty-state placeholder) into a separate
+      // component that would shadow it
+      if(n.closest("[data-bind]") || n.closest("[data-media]")) return;
+      if(n.closest("svg") || n.tagName === "IMG") return;
+      if(!(n.textContent || "").trim()) return;
+      var childHasText = Array.prototype.some.call(n.children, function(c){
+        return (c.textContent || "").trim().length > 0;
+      });
+      if(childHasText) return;              // not a leaf: keep descending
+      n.setAttribute("data-text","1");
+    });
+  }
+
+  /* Dragging a handle changes the element's BOX (width/height), it does not
+     stretch it with a transform. A non-uniform scale would squash the glyphs
+     and distort an inserted photo; resizing the box instead lets text reflow
+     at its true size and lets the image crop via object-fit, so neither is
+     ever deformed. The +/- buttons still apply a uniform scale, which is
+     distortion-free by definition. */
+  /* Identity for a component's stored edits.
+     A running index would be fatal here: filling in a field adds a line to the
+     page, every later index shifts by one, and a saved move or layer silently
+     lands on a different element. A form-backed field keys off its own field
+     path; everything else keys off a structural path, so adding a line only
+     affects keys inside that same block. Editor-only classes are excluded
+     because they come and go. */
+  var VOLATILE = { "is-sel":1, "p-ghost":1 };
+  function sigOf(n){
+    var cls = (n.getAttribute("class") || "").trim().split(/\s+/)
+      .filter(function(c){ return c && !VOLATILE[c]; }).join(".");
+    return n.tagName.toLowerCase() + (cls ? "." + cls : "");
+  }
+  function keyFor(n, sheet, si){
+    if(n.hasAttribute("data-bind")) return si + "|b:" + n.getAttribute("data-bind");
+    var parts = [], cur = n;
+    while(cur && cur !== sheet && cur.parentElement){
+      var p = cur.parentElement, sig = sigOf(cur), idx = 0;
+      for(var i = 0; i < p.children.length; i++){
+        if(p.children[i] === cur) break;
+        if(sigOf(p.children[i]) === sig) idx++;
+      }
+      parts.unshift(sig + "[" + idx + "]");
+      cur = p;
+    }
+    return si + "|" + parts.join("/");
+  }
+
+  function transformOf(s){
+    var t = "", sc = s.s === undefined ? 1 : s.s;
+    if(s.x || s.y) t = "translate("+(s.x||0).toFixed(3)+"cqw,"+(s.y||0).toFixed(3)+"cqw)";
+    if(sc !== 1) t += (t ? " " : "") + "scale("+sc.toFixed(3)+")";
+    return t;
+  }
+  function clamp(v,lo,hi){ return Math.max(lo, Math.min(hi, v)); }
+  function applyBox(e, s){
+    if(s.w === undefined && s.h === undefined) return;
+    var media = e.hasAttribute("data-media");
+    e.style.flex = "none";
+    if(s.w !== undefined) e.style.width = s.w.toFixed(3)+"cqw";
+    if(s.h !== undefined){
+      // a picture frame takes an exact height and lets object-fit crop the
+      // image, so the photo keeps its own proportions however the frame is
+      // dragged; text gets a floor instead, so it can never be clipped
+      if(media) e.style.height = s.h.toFixed(3)+"cqw";
+      else e.style.minHeight = s.h.toFixed(3)+"cqw";
+    }
+    if(media) e.style.aspectRatio = "auto";   // release the locked ratio
+  }
+
+  /* transform, width and height are all ignored on a non-replaced inline box,
+     so an inline run of text could be dragged but would never actually move.
+     Promoting it to inline-block keeps it in the text flow and makes it
+     movable, scalable and able to carry the resize grip. */
+  function makeMovable(e){
+    if(e && getComputedStyle(e).display === "inline") e.style.display = "inline-block";
+  }
   function applyEdits(){
-    $$("#sheets .el").forEach(function(e){
+    $$("#sheets [data-ek]").forEach(function(e){
       var s = state.edits[e.dataset.ek];
       if(!s) return;
       if(s.hidden){ e.style.display = "none"; return; }
-      if(s.x||s.y) e.style.transform = "translate("+(s.x||0).toFixed(3)+"cqw,"+(s.y||0).toFixed(3)+"cqw)";
+      var t = transformOf(s);
+      if(t || s.w !== undefined || s.h !== undefined) makeMovable(e);
+      if(t) e.style.transform = t;
+      applyBox(e, s);
+      paintZ(e);
       if(typeof s.html === "string") e.innerHTML = s.html;
     });
   }
@@ -1511,50 +1940,274 @@ img{max-width:100%;display:block}
   /* ==========================================================
      6 · EDITOR
      ========================================================== */
-  var sel = null;
-  function positionBar(){
-    var bar = $("#elbar");
-    if(!sel){ bar.removeAttribute("data-on"); return; }
+  var sel = null, editing = null;
+
+  /* The menu anchors to whatever is actually being changed — the bound field
+     while typing, otherwise the selected block. It hides itself when that
+     anchor is gone or off-screen, and flips below when there is no room
+     above, so it can never end up stranded in empty space. */
+  function positionSel(){
+    var box = $("#selbox");
+    if(!box) return;
+    var vh = document.documentElement.clientHeight;
+    var vw = document.documentElement.clientWidth;
+    if(!sel || !sel.isConnected || editing){ box.removeAttribute("data-on"); return; }
     var r = sel.getBoundingClientRect();
+    if((r.width === 0 && r.height === 0) || r.bottom < 0 || r.top > vh || r.right < 0 || r.left > vw){
+      box.removeAttribute("data-on"); return;
+    }
+    box.setAttribute("data-on","1");
+    box.style.left = r.left + "px";
+    box.style.top = r.top + "px";
+    box.style.width = r.width + "px";
+    box.style.height = r.height + "px";
+  }
+
+  function positionBar(){
+    positionSel();
+    var bar = $("#elbar");
+    var a = editing || sel;
+    if(!a || !a.isConnected){ bar.removeAttribute("data-on"); return; }
+    var r = a.getBoundingClientRect();
+    if(r.width === 0 && r.height === 0){ bar.removeAttribute("data-on"); return; }
+
+    var vw = document.documentElement.clientWidth;
+    var vh = document.documentElement.clientHeight;
+    if(r.bottom < 0 || r.top > vh || r.right < 0 || r.left > vw){
+      bar.removeAttribute("data-on"); return;      // anchor scrolled out of view
+    }
+
     bar.setAttribute("data-on","1");
-    bar.style.left = Math.max(8, r.left) + "px";
-    bar.style.top  = Math.max(38, r.top - 8) + "px";
+    var bw = bar.offsetWidth, bh = bar.offsetHeight, gap = 9;
+    var below = false, top;
+
+    if(r.top - bh - gap >= 4){                        // room above
+      top = r.top - bh - gap;
+    } else if(r.bottom + gap + bh <= vh - 4){         // room below
+      top = r.bottom + gap; below = true;
+    } else {                                          // tall block: ride its
+      top = Math.max(4, Math.min(r.top + gap, vh - bh - 4));   // visible top
+      below = true;
+    }
+
+    var left = Math.min(Math.max(4, r.left), Math.max(4, vw - bw - 4));
+    bar.style.left = left + "px";
+    bar.style.top  = top + "px";
+    bar.dataset.below = below ? "1" : "0";
+
+    // "แก้ข้อความ" is only meaningful on information text — a photo frame or a
+    // decorative block has nothing to retype, so the button is hidden there
+    $("#elEdit").hidden = !(editing ? true : isText(sel));
+    // keep the caret over the anchor even when the bar is clamped sideways
+    var caret = Math.min(Math.max(12, r.left + Math.min(24, r.width / 2) - left), bw - 12);
+    bar.style.setProperty("--caret", caret + "px");
   }
   function select(e){
-    if(sel && sel !== e){ sel.classList.remove("is-sel"); stopEdit(sel); }
+    if(sel && sel !== e) sel.classList.remove("is-sel");
     sel = e;
-    if(sel) sel.classList.add("is-sel");
+    if(sel){ makeMovable(sel); sel.classList.add("is-sel"); }
     positionBar();
   }
   function deselect(){
-    if(sel){ sel.classList.remove("is-sel"); stopEdit(sel); }
+    commitEdit();
+    if(sel) sel.classList.remove("is-sel");
     sel = null;
     $("#elbar").removeAttribute("data-on");
+    $("#selbox").removeAttribute("data-on");
   }
-  function stopEdit(e){
-    if(e && e.getAttribute("contenteditable")==="true"){
-      e.removeAttribute("contenteditable");
-      var k = e.dataset.ek;
-      state.edits[k] = state.edits[k] || {x:0,y:0};
-      state.edits[k].html = e.innerHTML;
+
+  /* Committing a text edit: a bound field writes straight back into the form
+     data (and the form inputs), so pages 3–6 stay in step with page 7. An
+     unbound block keeps a local HTML override instead. */
+  function commitEdit(){
+    var e = editing;
+    if(!e) return;
+    editing = null;
+    e.removeAttribute("contenteditable");
+    var text = tidy(e.textContent);
+    var path = e.dataset.bind;
+    var ek = e.dataset.ek;
+
+    if(path && writeBind(path, text)){
+      fillForm();
+      renderBook();                    // wipes the DOM, so re-find by key
+      sel = ek ? $('#sheets [data-ek="'+ek+'"]') : null;
+      if(sel) sel.classList.add("is-sel");
+      positionBar();
+      pushHist();
+      return;
     }
+    // free text with no form field behind it: keep it on this page only
+    if(ek){
+      state.edits[ek] = state.edits[ek] || {x:0,y:0};
+      state.edits[ek].html = e.innerHTML;
+    }
+    positionBar();
+    pushHist();
   }
+  function startEditOn(e){
+    if(!e) return;
+    commitEdit();
+    editing = e;
+    if(e.querySelector(".p-ghost") || e.classList.contains("p-ghost")) e.textContent = "";
+    e.setAttribute("contenteditable","true");
+    e.focus();
+    var r = document.createRange();
+    r.selectNodeContents(e);
+    var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+    positionBar();   // re-anchor onto the field itself, not the whole block
+  }
+  function isText(n){ return !!n && (n.hasAttribute("data-bind") || n.hasAttribute("data-text")); }
   function startEdit(){
+    if(isText(sel)) startEditOn(sel);   // only a text component is retypable
+  }
+  function scaleBy(f){
     if(!sel) return;
-    sel.setAttribute("contenteditable","true");
-    sel.focus();
+    var k = sel.dataset.ek;
+    var st = state.edits[k] = state.edits[k] || {x:0,y:0};
+    st.s = clamp((st.s === undefined ? 1 : st.s) * f, 0.3, 4);   // uniform: no distortion
+    makeMovable(sel);
+    sel.style.transform = transformOf(st);
+    positionBar();
+    pushHist();
+  }
+
+  /* ---------- layering ----------
+     Stacking is kept at zero and above on purpose: a negative z-index would
+     drop a component behind the card background it sits on and make it vanish.
+     When "send to back" would go below zero the whole layered set is shifted
+     up instead, which preserves the order without ever going negative. */
+  function paintZ(n){
+    var s = state.edits[n.dataset.ek];
+    if(!s || s.z === undefined) return;
+    n.style.position = "relative";
+    n.style.zIndex = s.z;
+  }
+  function zOf(n){
+    var s = state.edits[n.dataset.ek];
+    return (s && s.z !== undefined) ? s.z : 0;
+  }
+  /* The component that owns this one's stacking — the nearest ancestor that is
+     itself a component, or the sheet. */
+  function scopeOf(n, sheet){
+    var p = n.parentElement;
+    while(p && p !== sheet){
+      if(p.hasAttribute("data-ek")) return p;
+      p = p.parentElement;
+    }
+    return sheet;
+  }
+  function peersOf(n, sheet){
+    var scope = scopeOf(n, sheet);
+    return $$("[data-ek]", scope).filter(function(m){ return scopeOf(m, sheet) === scope; });
+  }
+  /* Renumber a whole peer group 1..N with the node placed at one end.
+     Assigning every peer an explicit z is what makes "send to back" work:
+     a lone z-index:0 loses to a sibling on z-index:auto, because equal levels
+     are resolved by document order — the element would refuse to go behind. */
+  function reorder(node, toFront, sheet){
+    var peers = peersOf(node, sheet);
+    if(peers.length < 2) return;
+    peers.sort(function(a, b){
+      var za = zOf(a), zb = zOf(b);
+      if(za !== zb) return za - zb;
+      return (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1;
+    });
+    peers = peers.filter(function(m){ return m !== node; });
+    if(toFront) peers.push(node); else peers.unshift(node);
+    peers.forEach(function(m, i){
+      var k = m.dataset.ek;
+      var st = state.edits[k] = state.edits[k] || {x:0,y:0};
+      st.z = i + 1;                       // always positive: nothing can sink
+      paintZ(m);                          // behind a parent's own background
+    });
+  }
+  function setLayer(toFront){
+    if(!sel) return;
+    var sheet = sel.closest(".sheet");
+    if(!sheet) return;
+    reorder(sel, toFront, sheet);
+    // carry the whole ancestor path with it, otherwise a nested component can
+    // never clear a card that is not its own parent
+    var n = scopeOf(sel, sheet);
+    while(n && n !== sheet){
+      reorder(n, toFront, sheet);
+      n = scopeOf(n, sheet);
+    }
+    pushHist();
+    positionBar();
+  }
+
+  /* Drag any of the eight handles to resize. Width and height move
+     independently, and the edge opposite the handle stays put — pulling the
+     left handle grows the box leftwards rather than sliding it. */
+  function startResize(ev, dir){
+    if(!sel) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    commitEdit();
+    makeMovable(sel);
+    var e = sel;
+    var k = e.dataset.ek;
+    var st = state.edits[k] = state.edits[k] || {x:0,y:0};
+    var sheet = e.closest(".sheet");
+    var W = sheet ? (sheet.getBoundingClientRect().width || 1) : 1;
+    var r = e.getBoundingClientRect();
+    var sc = st.s === undefined ? 1 : st.s;        // uniform scale already on it
+    var curW = r.width / sc, curH = r.height / sc; // untransformed box, in px
+    var x0 = st.x || 0, y0 = st.y || 0;
+    var startX = ev.clientX, startY = ev.clientY;
+    var horiz = dir.indexOf("e") >= 0 || dir.indexOf("w") >= 0;
+    var vert  = dir.indexOf("n") >= 0 || dir.indexOf("s") >= 0;
+
+    // Releasing a picture frame's aspect-ratio would collapse the axis we are
+    // not dragging, so pin both to what they are right now before starting.
+    if(e.hasAttribute("data-media")){
+      if(st.w === undefined) st.w = curW / W * 100;
+      if(st.h === undefined) st.h = curH / W * 100;
+    }
+
+    function mv(m){
+      var dx = (m.clientX - startX) / sc, dy = (m.clientY - startY) / sc;
+      var nx = x0, ny = y0;
+      if(horiz){
+        var w = dir.indexOf("w") >= 0 ? curW - dx : curW + dx;
+        if(dir.indexOf("w") >= 0) nx = x0 + (m.clientX - startX) / W * 100;
+        st.w = clamp(w, 10, 4000) / W * 100;
+      }
+      if(vert){
+        var h = dir.indexOf("n") >= 0 ? curH - dy : curH + dy;
+        if(dir.indexOf("n") >= 0) ny = y0 + (m.clientY - startY) / W * 100;
+        st.h = clamp(h, 10, 4000) / W * 100;
+      }
+      st.x = nx; st.y = ny;
+      e.style.transform = transformOf(st);
+      applyBox(e, st);
+      positionBar();
+    }
+    function up(){
+      window.removeEventListener("pointermove", mv);
+      window.removeEventListener("pointerup", up);
+      positionBar();
+      pushHist();
+    }
+    window.addEventListener("pointermove", mv);
+    window.addEventListener("pointerup", up);
   }
 
   function initEditor(){
     var host = $("#sheets");
 
     host.addEventListener("pointerdown", function(ev){
-      if(!state.edit) return;
-      var e = ev.target.closest(".el");
+      if(ev.target.getAttribute && ev.target.getAttribute("contenteditable")==="true") return;
+      // innermost selectable wins: click the text, get the text — click the
+      // block's own space, get the block
+      var e = ev.target.closest("[data-ek]");
       if(!e){ deselect(); return; }
-      if(e.getAttribute("contenteditable")==="true") return;
       ev.preventDefault();
+      commitEdit();
       select(e);
+
       var sheet = e.closest(".sheet");
       var w = sheet.getBoundingClientRect().width || 1;
       var k = e.dataset.ek;
@@ -1563,28 +2216,31 @@ img{max-width:100%;display:block}
       function mv(m){
         st.x = ox + (m.clientX - sx)/w*100;
         st.y = oy + (m.clientY - sy)/w*100;
-        e.style.transform = "translate("+st.x.toFixed(3)+"cqw,"+st.y.toFixed(3)+"cqw)";
+        e.style.transform = transformOf(st);
         positionBar();
       }
       function up(){
         window.removeEventListener("pointermove", mv);
         window.removeEventListener("pointerup", up);
         positionBar();
+        pushHist();
       }
       window.addEventListener("pointermove", mv);
       window.addEventListener("pointerup", up);
     });
 
     host.addEventListener("dblclick", function(ev){
-      if(!state.edit) return;
-      var e = ev.target.closest(".el");
-      if(!e) return;
-      select(e); startEdit();
+      var b = ev.target.closest("[data-bind],[data-text]");
+      if(b){ select(b); startEditOn(b); return; }
+      var e = ev.target.closest("[data-ek]");
+      if(e) select(e);          // not text: select, do not retype
     });
 
-    host.addEventListener("focusout", function(ev){
-      var e = ev.target.closest ? ev.target.closest(".el") : null;
-      if(e) stopEdit(e);
+    host.addEventListener("focusout", function(){ commitEdit(); });
+
+    $("#selbox").addEventListener("pointerdown", function(ev){
+      var h = ev.target.closest("[data-h]");
+      if(h) startResize(ev, h.dataset.h);
     });
 
     $("#elDel").addEventListener("click", function(){
@@ -1594,35 +2250,51 @@ img{max-width:100%;display:block}
       state.edits[k].hidden = true;
       sel.style.display = "none";
       deselect();
+      pushHist();
     });
     $("#elEdit").addEventListener("click", startEdit);
+    $("#elUp").addEventListener("click", function(){ scaleBy(1.12); });
+    $("#elDown").addEventListener("click", function(){ scaleBy(1/1.12); });
+    $("#elFront").addEventListener("click", function(){ setLayer(true); });
+    $("#elBack").addEventListener("click", function(){ setLayer(false); });
 
     document.addEventListener("keydown", function(ev){
-      if(!state.edit || !sel) return;
-      if(sel.getAttribute("contenteditable")==="true"){
-        if(ev.key==="Escape"){ stopEdit(sel); sel.blur(); }
+      if(editing){
+        if(ev.key==="Escape"){ editing.blur(); commitEdit(); }
         return;
       }
+      if(!sel) return;
       if(ev.key==="Delete" || ev.key==="Backspace"){ ev.preventDefault(); $("#elDel").click(); }
-      if(ev.key==="Escape") deselect();
+      else if(ev.key==="Escape") deselect();
+      else if(ev.key==="+" || ev.key==="="){ ev.preventDefault(); scaleBy(1.12); }
+      else if(ev.key==="-" || ev.key==="_"){ ev.preventDefault(); scaleBy(1/1.12); }
     });
 
-    window.addEventListener("scroll", function(){ if(sel) positionBar(); }, true);
-    window.addEventListener("resize", function(){ if(sel) positionBar(); });
-
-    $("#btnEdit").addEventListener("click", function(){
-      state.edit = !state.edit;
-      this.setAttribute("aria-pressed", state.edit?"true":"false");
-      $$("#sheets .sheet").forEach(function(s){ s.classList.toggle("is-edit", state.edit); });
-      if(!state.edit) deselect();
-      msg(state.edit
-        ? "โหมดแก้ไขเปิดอยู่ — คลิกเพื่อเลือก ลากเพื่อย้าย ดับเบิลคลิกเพื่อพิมพ์ทับ กด Delete เพื่อลบ"
-        : "ปิดโหมดแก้ไขแล้ว", "ok");
-    });
+    // keep the menu glued to its anchor through scrolling of the page or of
+    // any inner scroller, and through layout shifts
+    // positioned synchronously: rAF is throttled or suspended in some hosts,
+    // and a menu that lags its anchor is worse than a few extra reflows
+    function follow(){ if(sel || editing) positionBar(); }
+    window.addEventListener("scroll", follow, true);
+    document.addEventListener("scroll", follow, true);
+    window.addEventListener("resize", follow);
+    if(window.ResizeObserver){
+      new ResizeObserver(follow).observe(document.documentElement);
+    }
 
     $("#btnReset").addEventListener("click", function(){
       state.edits = {}; deselect(); renderBook();
+      pushHist();
       msg("คืนค่าทุกหน้ากลับเป็นแบบเดิมแล้ว","ok");
+    });
+    $("#btnUndo").addEventListener("click", undo);
+    $("#btnRedo").addEventListener("click", redo);
+    document.addEventListener("keydown", function(ev){
+      if(state.screen !== 7 || editing) return;
+      var mod = ev.ctrlKey || ev.metaKey;
+      if(!mod) return;
+      if(ev.key === "z" && !ev.shiftKey){ ev.preventDefault(); undo(); }
+      else if(ev.key === "y" || (ev.key === "z" && ev.shiftKey)){ ev.preventDefault(); redo(); }
     });
 
     $("#rail").addEventListener("click", function(ev){
@@ -1655,11 +2327,17 @@ img{max-width:100%;display:block}
 
   function buildStandalone(){
     var clone = $("#sheets").cloneNode(true);
-    $$(".el", clone).forEach(function(e){
-      e.classList.remove("is-sel");
-      e.removeAttribute("contenteditable");
-      e.removeAttribute("data-ek");
-    });
+    $$("[data-ek],[data-text],[data-bind],[data-media],[data-box],[data-pin],.is-sel,[contenteditable]", clone)
+      .forEach(function(e){
+        e.classList.remove("is-sel");
+        e.removeAttribute("contenteditable");
+        e.removeAttribute("data-ek");
+        e.removeAttribute("data-text");
+        e.removeAttribute("data-bind");
+        e.removeAttribute("data-media");
+        e.removeAttribute("data-box");
+        e.removeAttribute("data-pin");
+      });
     $$(".sheet", clone).forEach(function(s){ s.classList.remove("is-edit"); });
     $$(".cap", clone).forEach(function(c){ if(c.parentNode.classList.contains("sheetbox")) c.remove(); });
 
@@ -1692,43 +2370,232 @@ img{max-width:100%;display:block}
     window.claude.use("downloads").then(function(ns){ downloads = ns; }).catch(function(){});
   }
 
-  function saveBlob(filename, text){
-    try{
-      var blob = new Blob([text], {type:"text/html;charset=utf-8"});
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement("a");
-      a.href = url; a.download = filename;
-      document.body.appendChild(a); a.click();
-      setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 1000);
-      return true;
-    }catch(e){ return false; }
+  /* ---------- image export ----------
+     A sheet is rasterised by wrapping it in an SVG <foreignObject> and drawing
+     that into a canvas. The stylesheet has to be wrapped in CDATA: it contains
+     "<" (from :not(...) and media queries) and the SVG is parsed as XML, so a
+     raw <style> makes the whole image fail to load. */
+  var fontCssCache = null;
+  function wantedFamilies(){
+    var F = FACULTIES[state.faculty] || {};
+    return ["Sarabun", (F.font || "").replace(/["']/g, "").split(",")[0].trim()]
+      .filter(Boolean);
+  }
+  function embedFonts(){
+    if(fontCssCache !== null) return Promise.resolve(fontCssCache);
+    // Opening the file straight from disk gives an opaque "null" origin, and
+    // the font host refuses those — don't even try, or every image export logs
+    // a CORS failure. Served over http(s) the fonts embed normally.
+    if(!/^https?:$/.test(location.protocol)){ fontCssCache = ""; return Promise.resolve(""); }
+    var fams = wantedFamilies();
+    return fetch(FONT_HREF).then(function(r){ return r.text(); }).then(function(css){
+      var blocks = css.split("@font-face").filter(function(b){
+        return fams.some(function(f){ return b.indexOf("'"+f+"'") > -1 || b.indexOf('"'+f+'"') > -1; });
+      });
+      var urls = [];
+      blocks.forEach(function(b){
+        var m = b.match(/url\((https:[^)]+\.woff2)\)/g) || [];
+        m.forEach(function(u){ u = u.slice(4, -1); if(urls.indexOf(u) < 0) urls.push(u); });
+      });
+      urls = urls.slice(0, 24);
+      return Promise.all(urls.map(function(u){
+        return fetch(u).then(function(r){ return r.blob(); }).then(function(b){
+          return new Promise(function(res){
+            var fr = new FileReader();
+            fr.onload = function(){ res([u, fr.result]); };
+            fr.onerror = function(){ res(null); };
+            fr.readAsDataURL(b);
+          });
+        }).catch(function(){ return null; });
+      })).then(function(pairs){
+        var map = {};
+        pairs.forEach(function(p){ if(p) map[p[0]] = p[1]; });
+        fontCssCache = blocks.map(function(b){
+          return "@font-face" + b.replace(/url\((https:[^)]+\.woff2)\)/g, function(m, u){
+            return map[u] ? "url(" + map[u] + ")" : m;
+          });
+        }).join("\n");
+        return fontCssCache;
+      });
+    }).catch(function(){ fontCssCache = ""; return fontCssCache; });
   }
 
-  function doExport(){
-    var btn = $("#btnExport");
-    var base = slug(D.nameEn || D.nameTh) + "-portfolio";
-    var body = buildStandalone();
-    if(!downloads){
-      if(saveBlob(base+".html", body)) msg("บันทึกไฟล์แล้ว เปิดในเบราว์เซอร์แล้วสั่งพิมพ์เป็น A4 ได้เลย","ok");
-      else msg("บันทึกไฟล์ไม่ได้ในหน้านี้","warn");
+  function visibleSheet(){
+    var mid = window.innerHeight / 2, best = null, bd = Infinity;
+    $$("#sheets .sheet").forEach(function(s){
+      var r = s.getBoundingClientRect();
+      var d = Math.abs((r.top + r.bottom) / 2 - mid);
+      if(d < bd){ bd = d; best = s; }
+    });
+    return best || $("#sheets .sheet");
+  }
+
+  function sheetToBlob(sheet, mime){
+    var clone = sheet.cloneNode(true);
+    clone.classList.remove("is-edit");
+    $$("*", clone).forEach(function(n){
+      n.classList.remove("is-sel");
+      ["data-ek","data-text","data-bind","data-media","data-box","data-pin","contenteditable"]
+        .forEach(function(a){ n.removeAttribute(a); });
+    });
+    var W = 794, H = 1123, SCALE = 2;
+    return embedFonts().then(function(fontCss){
+      var css = fontCss + "\n" + $("#pf-css").textContent + "\n" + $("#fac-css").textContent;
+      var xhtml = new XMLSerializer().serializeToString(clone);
+      var svg =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="'+(W*SCALE)+'" height="'+(H*SCALE)+
+        '" viewBox="0 0 '+W+' '+H+'"><foreignObject width="'+W+'" height="'+H+'">'+
+        '<div xmlns="http://www.w3.org/1999/xhtml" style="width:'+W+'px;height:'+H+'px">'+
+        "<style>/*<![CDATA[*/" + css + "/*]]>*/</style>" + xhtml +
+        "</div></foreignObject></svg>";
+      return new Promise(function(resolve, reject){
+        var img = new Image();
+        img.onload = function(){
+          var c = document.createElement("canvas");
+          c.width = W * SCALE; c.height = H * SCALE;
+          var x = c.getContext("2d");
+          x.fillStyle = "#ffffff";
+          x.fillRect(0, 0, c.width, c.height);
+          x.drawImage(img, 0, 0, c.width, c.height);
+          c.toBlob(function(b){ b ? resolve(b) : reject(new Error("encode")); },
+                   mime, mime === "image/jpeg" ? 0.92 : undefined);
+        };
+        img.onerror = function(){ reject(new Error("render")); };
+        img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+      });
+    });
+  }
+
+  /* ---------- where the bytes go ----------
+     A folder the student picked wins; inside the Claude viewer the host's
+     download prompt is used; otherwise the browser's own download folder. */
+  var dl = { type:"pdf", handle:null, name:null };
+
+  function saveOut(filename, data, mime){
+    if(dl.handle){
+      return dl.handle.createWritable().then(function(w){
+        return w.write(data).then(function(){ return w.close(); });
+      }).then(function(){ return "picked"; });
+    }
+    if(downloads){
+      return downloads.save({ filename: filename, data: data }).then(function(){ return "host"; });
+    }
+    return new Promise(function(resolve, reject){
+      try{
+        var blob = (data instanceof Blob) ? data : new Blob([data], {type: mime || "text/html;charset=utf-8"});
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url; a.download = filename;
+        document.body.appendChild(a); a.click();
+        setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 1000);
+        resolve("browser");
+      }catch(e){ reject(e); }
+    });
+  }
+
+  function baseName(){
+    var n = tidy(D.nameEn) || tidy(D.nameTh);
+    return n ? slug(n) + "-portfolio" : "portfolio";
+  }
+
+  var TYPE_INFO = {
+    pdf:  { ext:"pdf",  mime:null,
+            note:"เปิดหน้าต่างพิมพ์ของเบราว์เซอร์ ให้เลือกปลายทางเป็น “บันทึกเป็น PDF” — ได้ครบ 14 หน้า ขนาด A4 ตัวอักษรคมชัด" },
+    png:  { ext:"png",  mime:"image/png",
+            note:"บันทึกเป็นภาพความละเอียดสูงของหน้าที่กำลังดูอยู่" },
+    jpg:  { ext:"jpg",  mime:"image/jpeg",
+            note:"บันทึกเป็นภาพ JPG ของหน้าที่กำลังดูอยู่ ไฟล์เล็กกว่า PNG" },
+    html: { ext:"html", mime:"text/html;charset=utf-8",
+            note:"ไฟล์เดียวจบ ครบ 14 หน้า เปิดในเบราว์เซอร์เครื่องไหนก็ได้ และสั่งพิมพ์ต่อได้" }
+  };
+
+  function paintDlMenu(){
+    var t = dl.type, info = TYPE_INFO[t];
+    $$("#dlTypes button").forEach(function(b){
+      b.setAttribute("aria-pressed", b.dataset.t === t ? "true" : "false");
+    });
+    var where = $("#dlWhere"), note = info.note;
+    var canPick = typeof window.showSaveFilePicker === "function";
+    if(t === "pdf"){
+      where.disabled = true;
+      where.textContent = "หน้าต่างพิมพ์จะถามที่บันทึกเอง";
+      where.removeAttribute("data-set");
+    } else {
+      where.disabled = !canPick;
+      if(dl.handle && dl.name){ where.textContent = dl.name; where.setAttribute("data-set","1"); }
+      else {
+        where.textContent = canPick ? "เลือกโฟลเดอร์…" : "เก็บในโฟลเดอร์ดาวน์โหลด";
+        where.removeAttribute("data-set");
+      }
+      if(!canPick) note += " · เบราว์เซอร์นี้เลือกโฟลเดอร์เองไม่ได้ ไฟล์จะถูกเก็บในโฟลเดอร์ดาวน์โหลดตามปกติ";
+    }
+    $("#dlNote").textContent = note;
+  }
+
+  function openDlMenu(open){
+    var m = $("#dlmenu");
+    if(!open){ m.hidden = true; return; }
+    paintDlMenu();
+    m.hidden = false;
+    var b = $("#btnExport").getBoundingClientRect();
+    var r = m.getBoundingClientRect();
+    var left = Math.min(Math.max(8, b.left + b.width/2 - r.width/2),
+                        Math.max(8, document.documentElement.clientWidth - r.width - 8));
+    m.style.left = left + "px";
+    m.style.top = Math.max(8, b.top - r.height - 10) + "px";
+  }
+
+  function pickLocation(){
+    var info = TYPE_INFO[dl.type];
+    var base = baseName();
+    var accept = {};
+    accept[info.mime || "application/octet-stream"] = ["." + info.ext];
+    return window.showSaveFilePicker({
+      suggestedName: base + "." + info.ext,
+      types: [{ description: info.ext.toUpperCase(), accept: accept }]
+    }).then(function(h){
+      dl.handle = h; dl.name = h.name; paintDlMenu();
+    }).catch(function(){ /* picker dismissed */ });
+  }
+
+  function runDownload(){
+    var t = dl.type, info = TYPE_INFO[t];
+    var base = baseName();
+    var go = $("#dlGo");
+
+    if(t === "pdf"){
+      openDlMenu(false);
+      deselect();
+      try{ window.print(); }
+      catch(e){ msg("สั่งพิมพ์จากหน้านี้ไม่ได้ ลองเลือกชนิดไฟล์ HTML แล้วเปิดไฟล์เพื่อสั่งพิมพ์แทน","warn"); }
       return;
     }
-    btn.disabled = true;
-    downloads.save({ filename: base+".html", data: body })
-      .then(function(){ msg("บันทึกไฟล์แล้ว เปิดในเบราว์เซอร์แล้วสั่งพิมพ์เป็น A4 ได้เลย","ok"); })
-      .catch(function(err){
-        var c = err && err.code;
-        if(c === "extension_not_enabled"){
-          return downloads.save({ filename: base+".txt", data: body })
-            .then(function(){ msg("บันทึกเป็น .txt แล้ว เปลี่ยนนามสกุลเป็น .html เพื่อเปิดเป็นหน้าเว็บ","warn"); });
-        }
-        if(c === "declined"){ msg("ยกเลิกการบันทึก","warn"); return; }
-        if(c === "too_large"){ msg("ไฟล์ใหญ่เกินไป ลองลดจำนวนรูปหรือใช้รูปที่เล็กลง","warn"); return; }
-        if(c === "rate_limited"){ msg("มีหน้าต่างบันทึกเปิดอยู่แล้ว ทำรายการนั้นให้เสร็จก่อน","warn"); return; }
-        msg("บันทึกไฟล์ไม่ได้ในหน้านี้","warn");
-      })
-      .catch(function(){ msg("บันทึกไฟล์ไม่ได้ในหน้านี้","warn"); })
-      .then(function(){ btn.disabled = false; });
+
+    go.disabled = true;
+    var work;
+    if(t === "html"){
+      work = saveOut(base + ".html", buildStandalone(), info.mime);
+    } else {
+      var sheet = visibleSheet();
+      var page = sheet ? (Number(sheet.dataset.i) + 1) : 1;
+      work = sheetToBlob(sheet, info.mime).then(function(blob){
+        return saveOut(base + "-p" + page + "." + info.ext, blob, info.mime);
+      });
+    }
+
+    work.then(function(how){
+      openDlMenu(false);
+      msg(how === "picked" ? "บันทึกไฟล์ไปยังที่ที่เลือกไว้แล้ว" : "บันทึกไฟล์แล้ว", "ok");
+    }).catch(function(err){
+      var c = err && err.code;
+      if(c === "declined"){ msg("ยกเลิกการบันทึก","warn"); }
+      else if(c === "too_large"){ msg("ไฟล์ใหญ่เกินไป ลองลดจำนวนรูปหรือใช้รูปที่เล็กลง","warn"); }
+      else if(c === "extension_not_enabled"){
+        return saveOut(base + ".txt", buildStandalone(), "text/plain")
+          .then(function(){ msg("บันทึกเป็น .txt แล้ว เปลี่ยนนามสกุลเป็น .html เพื่อเปิดเป็นหน้าเว็บ","warn"); });
+      }
+      else { msg("บันทึกไฟล์ไม่สำเร็จ ลองอีกครั้งหรือเลือกชนิดไฟล์อื่น","warn"); }
+    }).then(function(){ go.disabled = false; });
   }
 
   function doPrint(){
@@ -1796,13 +2663,16 @@ img{max-width:100%;display:block}
   /* ==========================================================
      9 · REPEATABLE LISTS
      ========================================================== */
-  function inp(list,i,f,val,ph,type){
-    return '<input type="'+(type||"text")+'" data-list="'+list+'" data-i="'+i+'" data-f="'+f+
-      '" value="'+esc(val)+'" placeholder="'+esc(ph)+'">';
+  /* One placeholder for every empty field in the app. */
+  var PH = "ใส่ข้อมูลที่นี้";
+
+  function inp(list,i,f,val){
+    return '<input type="text" data-list="'+list+'" data-i="'+i+'" data-f="'+f+
+      '" value="'+esc(val)+'" placeholder="'+PH+'">';
   }
-  function txa(list,i,f,val,ph){
+  function txa(list,i,f,val){
     return '<textarea data-list="'+list+'" data-i="'+i+'" data-f="'+f+
-      '" placeholder="'+esc(ph)+'">'+esc(val)+"</textarea>";
+      '" placeholder="'+PH+'">'+esc(val)+"</textarea>";
   }
   function upBox(list,i,label){
     return '<div class="up" data-up="item" data-list="'+list+'" data-i="'+i+'">'+
@@ -1814,23 +2684,46 @@ img{max-width:100%;display:block}
   }
   function xb(list,i){ return '<button class="xbtn" type="button" data-del="'+list+'" data-i="'+i+'" title="ลบ">✕</button>'; }
 
+  /* The 10–100 hint sits above the track. A range thumb is 20px wide and its
+     centre only travels between 10px and (width - 10px), so each label is
+     placed with that inset — otherwise the ticks drift from the thumb. */
+  var TICKS = [10,20,30,40,50,60,70,80,90,100];
+  var TICKS_HTML = TICKS.map(function(v){
+    return '<span style="left:calc(10px + (100% - 20px) * '+(v/100)+')">'+v+"</span>";
+  }).join("");
+
+  function paintRange(el){
+    var v = Math.max(0, Math.min(100, Number(el.value) || 0));
+    el.style.setProperty("--p", v + "%");
+    var row = el.closest(".entry");
+    var out = row && row.querySelector(".pct b");
+    if(out) out.textContent = v;
+  }
+
   function renderLangs(){
     $("#langList").innerHTML = D.langs.map(function(l,i){
-      return '<div class="entry" style="padding:11px;margin-bottom:9px">'+
-        '<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr) 30px;gap:11px;align-items:center">'+
-          '<div class="fld">'+inp("langs",i,"name",l.name,"ภาษา")+"</div>"+
-          '<div class="fld"><input type="range" min="0" max="100" step="5" data-list="langs" data-i="'+i+
-            '" data-f="level" value="'+(Number(l.level)||0)+'" style="padding:0;border:0;background:transparent"></div>'+
+      var lv = Math.max(0, Math.min(100, Number(l.level) || 0));
+      return '<div class="entry" style="padding:13px;margin-bottom:9px">'+
+        '<div class="lang-head">'+
+          '<div class="fld">'+inp("langs",i,"name",l.name)+"</div>"+
+          '<span class="pct" aria-hidden="true"><b>'+lv+"</b>%</span>"+
           xb("langs",i)+
+        "</div>"+
+        '<div class="lang-scale">'+
+          '<span class="ticks" aria-hidden="true">'+TICKS_HTML+"</span>"+
+          '<input class="rng" type="range" min="0" max="100" step="10" data-list="langs" data-i="'+i+
+            '" data-f="level" value="'+lv+'" style="--p:'+lv+'%" '+
+            'aria-label="ระดับความสามารถทางภาษา (เปอร์เซ็นต์)">'+
         "</div></div>";
     }).join("");
+    $$("#langList .rng").forEach(paintRange);
   }
   function renderGrades(){
     $("#gradeList").innerHTML = D.grades.map(function(g,i){
       return '<div class="entry" style="padding:11px;margin-bottom:9px">'+
         '<div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) 30px;gap:11px;align-items:center">'+
-          '<div class="fld">'+inp("grades",i,"subject",g.subject,"เช่น ฟิสิกส์")+"</div>"+
-          '<div class="fld">'+inp("grades",i,"grade",g.grade,"เกรด เช่น 4.00")+"</div>"+
+          '<div class="fld">'+inp("grades",i,"subject",g.subject)+"</div>"+
+          '<div class="fld">'+inp("grades",i,"grade",g.grade)+"</div>"+
           xb("grades",i)+
         "</div></div>";
     }).join("");
@@ -1841,14 +2734,14 @@ img{max-width:100%;display:block}
       return '<div class="entry"><div class="entry-hd"><span class="n">'+(i+1)+"</span>"+
         '<span class="t">'+(tidy(a.title)||"กิจกรรมที่ "+(i+1))+"</span>"+xb("acts",i)+"</div>"+
         '<div class="grid2">'+
-          '<div class="fld"><label>ชื่อกิจกรรม</label>'+inp("acts",i,"title",a.title,"ค่ายวิศวะพบน้อง")+"</div>"+
+          '<div class="fld"><label>ชื่อกิจกรรม</label>'+inp("acts",i,"title",a.title)+"</div>"+
           '<div class="fld"><label>ประเภท</label><select data-list="acts" data-i="'+i+'" data-f="type">'+
             ACT_TYPES.map(function(t){ return '<option'+(t===a.type?" selected":"")+">"+t+"</option>"; }).join("")+
           "</select></div>"+
-          '<div class="fld"><label>ช่วงเวลา</label>'+inp("acts",i,"date",a.date,"มีนาคม 2568")+"</div>"+
-          '<div class="fld"><label>บทบาทของคุณ</label>'+inp("acts",i,"role",a.role,"หัวหน้ากลุ่ม")+"</div>"+
-          '<div class="fld span2"><label>รายละเอียดสั้น ๆ</label>'+txa("acts",i,"desc",a.desc,"ทำอะไร ที่ไหน กับใคร")+"</div>"+
-          '<div class="fld span2"><label>สิ่งที่ได้เรียนรู้</label>'+txa("acts",i,"learned",a.learned,"ได้อะไรกลับมาจากกิจกรรมนี้")+"</div>"+
+          '<div class="fld"><label>ช่วงเวลา</label>'+inp("acts",i,"date",a.date)+"</div>"+
+          '<div class="fld"><label>บทบาทของคุณ</label>'+inp("acts",i,"role",a.role)+"</div>"+
+          '<div class="fld span2"><label>รายละเอียดสั้น ๆ</label>'+txa("acts",i,"desc",a.desc)+"</div>"+
+          '<div class="fld span2"><label>สิ่งที่ได้เรียนรู้</label>'+txa("acts",i,"learned",a.learned)+"</div>"+
           '<div class="fld span2"><label>รูปกิจกรรม</label>'+upBox("acts",i,"เลือกรูป")+"</div>"+
         "</div></div>";
     }).join("");
@@ -1859,11 +2752,11 @@ img{max-width:100%;display:block}
       return '<div class="entry"><div class="entry-hd"><span class="n">'+(i+1)+"</span>"+
         '<span class="t">'+(tidy(w.name)||"ผลงานที่ "+(i+1))+(i===0?" · ขึ้นหน้าผลงานเด่น":"")+"</span>"+xb("works",i)+"</div>"+
         '<div class="grid2">'+
-          '<div class="fld"><label>ชื่อผลงาน</label>'+inp("works",i,"name",w.name,"เครื่องวัดน้ำอัจฉริยะ")+"</div>"+
-          '<div class="fld"><label>โจทย์ / วัตถุประสงค์</label>'+inp("works",i,"objective",w.objective,"ลดการอ่านมิเตอร์ด้วยมือ")+"</div>"+
-          '<div class="fld"><label>โปรแกรม / เครื่องมือที่ใช้</label>'+inp("works",i,"tools",w.tools,"Arduino, Fusion 360")+"</div>"+
-          '<div class="fld"><label>บทบาทของคุณ</label>'+inp("works",i,"role",w.role,"ออกแบบวงจรและเขียนเฟิร์มแวร์")+"</div>"+
-          '<div class="fld span2"><label>รายละเอียด</label>'+txa("works",i,"desc",w.desc,"ทำอะไร แก้ปัญหาอะไร ผลเป็นอย่างไร")+"</div>"+
+          '<div class="fld"><label>ชื่อผลงาน</label>'+inp("works",i,"name",w.name)+"</div>"+
+          '<div class="fld"><label>โจทย์ / วัตถุประสงค์</label>'+inp("works",i,"objective",w.objective)+"</div>"+
+          '<div class="fld"><label>โปรแกรม / เครื่องมือที่ใช้</label>'+inp("works",i,"tools",w.tools)+"</div>"+
+          '<div class="fld"><label>บทบาทของคุณ</label>'+inp("works",i,"role",w.role)+"</div>"+
+          '<div class="fld span2"><label>รายละเอียด</label>'+txa("works",i,"desc",w.desc)+"</div>"+
           '<div class="fld span2"><label>ภาพผลงาน</label>'+upBox("works",i,"เลือกรูป")+"</div>"+
         "</div></div>";
     }).join("");
@@ -1875,11 +2768,11 @@ img{max-width:100%;display:block}
       return '<div class="entry"><div class="entry-hd"><span class="n">'+(i+1)+"</span>"+
         '<span class="t">'+(tidy(c.name)||"เกียรติบัตรที่ "+(i+1))+"</span>"+xb("certs",i)+"</div>"+
         '<div class="grid2">'+
-          '<div class="fld"><label>ชื่อรางวัล / เกียรติบัตร</label>'+inp("certs",i,"name",c.name,"เหรียญทองแดง สอวน. คอมพิวเตอร์")+"</div>"+
+          '<div class="fld"><label>ชื่อรางวัล / เกียรติบัตร</label>'+inp("certs",i,"name",c.name)+"</div>"+
           '<div class="fld"><label>ระดับ</label><select data-list="certs" data-i="'+i+'" data-f="level">'+
             CERT_LV.map(function(t){ return '<option'+(t===c.level?" selected":"")+">"+t+"</option>"; }).join("")+
           "</select></div>"+
-          '<div class="fld"><label>วันที่ได้รับ</label>'+inp("certs",i,"date",c.date,"ธันวาคม 2567")+"</div>"+
+          '<div class="fld"><label>วันที่ได้รับ</label>'+inp("certs",i,"date",c.date)+"</div>"+
           '<div class="fld"><label>ภาพเกียรติบัตร</label>'+upBox("certs",i,"เลือกรูป")+"</div>"+
         "</div></div>";
     }).join("");
@@ -1908,6 +2801,7 @@ img{max-width:100%;display:block}
 
   function onFormInput(ev){
     var t = ev.target;
+    if(t.classList && t.classList.contains("rng")) paintRange(t);
     if(t.dataset && t.dataset.k !== undefined && t.dataset.k){ D[t.dataset.k] = t.value; return; }
     if(t.dataset && t.dataset.list){
       var arr = D[t.dataset.list], i = Number(t.dataset.i);
@@ -1934,9 +2828,10 @@ img{max-width:100%;display:block}
     var t = $("#screen"+n);
     if(t) t.setAttribute("data-on","1");
     $("#topbar").hidden = (n===1);
+    $("#toolbar").hidden = (n!==7);
     renderSteps();
     window.scrollTo(0,0);
-    if(n===7) renderBook();
+    if(n===7){ renderBook(); pushHist(); }
   }
 
   function renderFacs(){
@@ -2004,9 +2899,75 @@ img{max-width:100%;display:block}
   }
 
   /* ==========================================================
-     12 · INIT
+     12 · THEME
+     The stylesheet already defines a full light palette on :root,
+     a dark one behind prefers-color-scheme, and a third behind
+     [data-theme]. So the toggle only has to stamp the attribute —
+     every colour in the app is a token and follows automatically.
+     The icon shows the mode you are IN: sun = light, moon = dark.
+     ========================================================== */
+  var THEME_ICON = {
+    light:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '+
+      'stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/>'+
+      '<path d="M12 2.7v2.1M12 19.2v2.1M4.4 4.4l1.5 1.5M18.1 18.1l1.5 1.5M2.7 12h2.1M19.2 12h2.1'+
+      'M4.4 19.6l1.5-1.5M18.1 5.9l1.5-1.5"/></svg>',
+    dark:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '+
+      'stroke-linejoin="round" aria-hidden="true">'+
+      '<path d="M20.4 14.2A8.6 8.6 0 0 1 9.8 3.6a8.6 8.6 0 1 0 10.6 10.6z"/></svg>'
+  };
+
+  function currentTheme(){
+    var t = document.documentElement.getAttribute("data-theme");
+    if(t === "light" || t === "dark") return t;
+    return (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches)
+      ? "dark" : "light";
+  }
+  function paintTheme(){
+    var t = currentTheme();
+    var label = (t === "light") ? "โหมดสว่าง" : "โหมดมืด";
+    var hint  = (t === "light") ? "โหมดสว่าง · กดเพื่อเปลี่ยนเป็นโหมดมืด"
+                                : "โหมดมืด · กดเพื่อเปลี่ยนเป็นโหมดสว่าง";
+    $$("[data-theme-toggle]").forEach(function(b){
+      b.dataset.theme = t;
+      b.querySelector(".ic").innerHTML = THEME_ICON[t];
+      var l = b.querySelector(".lbl");
+      if(l) l.textContent = label;
+      b.setAttribute("aria-label", hint);
+      b.setAttribute("title", hint);
+      b.setAttribute("aria-pressed", t === "dark" ? "true" : "false");
+    });
+  }
+  function setTheme(t){
+    document.documentElement.setAttribute("data-theme", t);
+    try{ localStorage.setItem("ezport-theme", t); }catch(e){}
+    paintTheme();
+  }
+  function initTheme(){
+    var saved = null;
+    try{ saved = localStorage.getItem("ezport-theme"); }catch(e){}
+    if(saved === "light" || saved === "dark") document.documentElement.setAttribute("data-theme", saved);
+    paintTheme();
+    $$("[data-theme-toggle]").forEach(function(b){
+      b.addEventListener("click", function(){
+        setTheme(currentTheme() === "dark" ? "light" : "dark");
+      });
+    });
+    // while the visitor has made no explicit choice, follow the OS
+    if(window.matchMedia){
+      var mq = window.matchMedia("(prefers-color-scheme: dark)");
+      var onChange = function(){
+        if(!document.documentElement.getAttribute("data-theme")) paintTheme();
+      };
+      if(mq.addEventListener) mq.addEventListener("change", onChange);
+      else if(mq.addListener) mq.addListener(onChange);
+    }
+  }
+
+  /* ==========================================================
+     13 · INIT
      ========================================================== */
   function init(){
+    initTheme();
     renderFacs();
     fillForm();
     renderSteps();
@@ -2048,22 +3009,31 @@ img{max-width:100%;display:block}
     $("#btnStart").addEventListener("click", function(){ go(2); });
     $("#brandHome").addEventListener("click", function(){ go(1); });
     $("#btnBuild").addEventListener("click", function(){ go(7); });
-    $("#btnBackEdit").addEventListener("click", function(){ go(6); });
     $("#btnPrint").addEventListener("click", doPrint);
-    $("#btnExport").addEventListener("click", doExport);
+    $("#btnExport").addEventListener("click", function(ev){
+      ev.stopPropagation();
+      openDlMenu($("#dlmenu").hidden);
+    });
+    $("#dlTypes").addEventListener("click", function(ev){
+      var b = ev.target.closest("[data-t]");
+      if(!b) return;
+      if(dl.type !== b.dataset.t){ dl.handle = null; dl.name = null; }  // handle is per-format
+      dl.type = b.dataset.t;
+      paintDlMenu();
+    });
+    $("#dlWhere").addEventListener("click", function(){
+      if(typeof window.showSaveFilePicker === "function") pickLocation();
+    });
+    $("#dlGo").addEventListener("click", runDownload);
+    $("#dlmenu").addEventListener("click", function(ev){ ev.stopPropagation(); });
+    document.addEventListener("click", function(){ openDlMenu(false); });
+    document.addEventListener("keydown", function(ev){
+      if(ev.key === "Escape") openDlMenu(false);
+    });
+    window.addEventListener("resize", function(){ if(!$("#dlmenu").hidden) openDlMenu(true); });
 
     wireUpload($('.up[data-up="photo"]'), function(){ return D.photo; }, function(v){ D.photo = v; });
     wireUpload($('.up[data-up="logo"]'),  function(){ return D.logo;  }, function(v){ D.logo  = v; });
-
-    // demo shortcut
-    var row = $("#btnStart").parentNode;
-    var b = document.createElement("button");
-    b.type = "button"; b.className = "btn btn-lg"; b.textContent = "ดูตัวอย่างเล่มสำเร็จ";
-    b.addEventListener("click", function(){
-      sample(); fillForm(); go(7);
-      msg("นี่คือตัวอย่างข้อมูล — กด แก้ไขข้อมูล เพื่อใส่ของคุณเอง หรือเปลี่ยนคณะได้ที่ขั้นที่ 1","ok");
-    });
-    row.appendChild(b);
 
     if(!D.acts.length) D.acts.push(blankAct());
     if(!D.works.length) D.works.push(blankWork());
