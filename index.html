@@ -1244,7 +1244,7 @@ img{max-width:100%;display:block}
     <div class="hd" style="max-width:none">
       <span class="eyebrow">ขั้นที่ 6 · Your portfolio</span>
       <h1>พอร์ตโฟลิโอของคุณ</h1>
-      <p class="sub">14 หน้า พร้อมพิมพ์ขนาด A4 — แก้ไขได้ทันที คลิกเพื่อเลือก ลากเพื่อย้าย ลากจุดรอบกรอบเพื่อย่อ–ขยาย และดับเบิลคลิกเพื่อพิมพ์ทับข้อความ ข้อความที่แก้จะอัปเดตกลับไปยังหน้ากรอกข้อมูลด้วย<br><span class="en">บนมือถือ: แตะหนึ่งครั้งเพื่อเลือกก่อน แล้วจึงลากเพื่อย้าย — เลื่อนหน้าจอได้ตามปกติ</span></p>
+      <p class="sub">14 หน้า พร้อมพิมพ์ขนาด A4 — แก้ไขได้ทันที <b>คลิกค้างไว้</b>ที่ชิ้นงานเพื่อเปิดเมนู ลากเพื่อย้าย ลากจุดรอบกรอบเพื่อย่อ–ขยาย และดับเบิลคลิกเพื่อพิมพ์ทับข้อความ ข้อความที่แก้จะอัปเดตกลับไปยังหน้ากรอกข้อมูลด้วย<br><span class="en">บนมือถือ: แตะหนึ่งครั้งเพื่อเลือก แตะค้างเพื่อเปิดเมนู แล้วลากเพื่อย้าย — เลื่อนหน้าจอได้ตามปกติ</span></p>
     </div>
 
     <div class="work">
@@ -2092,6 +2092,13 @@ img{max-width:100%;display:block}
      6 · EDITOR
      ========================================================== */
   var sel = null, editing = null;
+  var HOLD_MS = 480, MOVE_SLOP = 5;
+  /* The menu is opened deliberately (press and hold, or entering text edit),
+     never merely by selecting — otherwise it appears under the cursor the
+     instant you go to drag something. */
+  var barOpen = false;
+  function openBar(){ barOpen = true; positionBar(); }
+  function closeBar(){ barOpen = false; $("#elbar").removeAttribute("data-on"); }
 
   /* The menu anchors to whatever is actually being changed — the bound field
      while typing, otherwise the selected block. It hides itself when that
@@ -2118,6 +2125,7 @@ img{max-width:100%;display:block}
     positionSel();
     var bar = $("#elbar");
     var a = editing || sel;
+    if(!barOpen && !editing){ bar.removeAttribute("data-on"); return; }
     if(!a || !a.isConnected){ bar.removeAttribute("data-on"); return; }
     var r = a.getBoundingClientRect();
     if(r.width === 0 && r.height === 0){ bar.removeAttribute("data-on"); return; }
@@ -2154,7 +2162,7 @@ img{max-width:100%;display:block}
     bar.style.setProperty("--caret", caret + "px");
   }
   function select(e){
-    if(sel && sel !== e) sel.classList.remove("is-sel");
+    if(sel && sel !== e){ sel.classList.remove("is-sel"); closeBar(); }
     sel = e;
     if(sel){ makeMovable(sel); sel.classList.add("is-sel"); }
     positionBar();
@@ -2163,7 +2171,7 @@ img{max-width:100%;display:block}
     commitEdit();
     if(sel) sel.classList.remove("is-sel");
     sel = null;
-    $("#elbar").removeAttribute("data-on");
+    closeBar();
     $("#selbox").removeAttribute("data-on");
   }
 
@@ -2200,6 +2208,7 @@ img{max-width:100%;display:block}
     if(!e) return;
     commitEdit();
     editing = e;
+    barOpen = true;                  // keep the menu up while typing
     if(e.querySelector(".p-ghost") || e.classList.contains("p-ghost")) e.textContent = "";
     e.setAttribute("contenteditable","true");
     e.focus();
@@ -2366,31 +2375,54 @@ img{max-width:100%;display:block}
       // selected. A mouse or pen keeps select-and-drag in one motion.
       var byTouch = ev.pointerType === "touch";
       var already = (sel === e);
-      select(e);
-      if(byTouch && !already) return;
-
-      ev.preventDefault();
-      try{ e.setPointerCapture(ev.pointerId); }catch(_e){}
+      select(e);                       // outline + handles; the menu stays shut
 
       var sheet = e.closest(".sheet");
-      var w = sheet.getBoundingClientRect().width || 1;
+      var w = sheet ? (sheet.getBoundingClientRect().width || 1) : 1;
+      var asc = ancestorScale(e, sheet);
       var k = e.dataset.ek;
       var st = state.edits[k] = state.edits[k] || {x:0,y:0};
-      var asc = ancestorScale(e, sheet);
       var sx = ev.clientX, sy = ev.clientY, ox = st.x||0, oy = st.y||0;
+      var moved = false, dragged = false;
+
+      /* Press and hold opens the menu; move instead and it is a drag. Same
+         rule for mouse and touch, so the gesture is learned once. */
+      var hold = setTimeout(function(){
+        hold = null;
+        if(!moved) openBar();
+      }, HOLD_MS);
+
+      // touch still needs one tap to select before it may claim the gesture,
+      // otherwise the page could never be scrolled
+      var canDrag = !byTouch || already;
+      if(canDrag){
+        ev.preventDefault();
+        try{ e.setPointerCapture(ev.pointerId); }catch(_e){}
+      }
+
       function mv(m){
+        if(!moved && (Math.abs(m.clientX - sx) > MOVE_SLOP ||
+                      Math.abs(m.clientY - sy) > MOVE_SLOP)){
+          moved = true;
+          if(hold){ clearTimeout(hold); hold = null; }
+          closeBar();
+        }
+        if(!canDrag || !moved) return;
+        dragged = true;
         st.x = ox + (m.clientX - sx)/asc/w*100;
         st.y = oy + (m.clientY - sy)/asc/w*100;
         e.style.transform = transformOf(st);
-        positionBar();
+        positionSel();
       }
       function up(){
+        if(hold){ clearTimeout(hold); hold = null; }
         window.removeEventListener("pointermove", mv);
         window.removeEventListener("pointerup", up);
         window.removeEventListener("pointercancel", up);
         try{ e.releasePointerCapture(ev.pointerId); }catch(_e){}
+        positionSel();
         positionBar();
-        pushHist();
+        if(dragged) pushHist();
       }
       window.addEventListener("pointermove", mv);
       window.addEventListener("pointerup", up);
