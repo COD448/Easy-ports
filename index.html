@@ -550,6 +550,10 @@ img{max-width:100%;display:block}
   outline:1.5px dashed var(--brand);outline-offset:3px;
 }
 .sheet.is-edit [data-ek].is-sel{outline:2px solid var(--brand);outline-offset:3px;cursor:grabbing}
+/* Touch: only the SELECTED component claims the gesture. Locking every
+   component would leave a phone user unable to scroll the page at all, since
+   components cover most of the sheet — so it is tap to select, then drag. */
+.sheet.is-edit [data-ek].is-sel{touch-action:none}
 .sheet.is-edit [contenteditable="true"]{outline:2px solid var(--mint);cursor:text}
 /* Resize handles ride in an overlay above the page rather than inside the
    sheet, so the exported markup stays free of editor furniture. */
@@ -558,9 +562,14 @@ img{max-width:100%;display:block}
 .selbox i{
   position:absolute;width:12px;height:12px;background:var(--brand);
   border:2px solid #fff;border-radius:3px;box-shadow:0 1px 4px rgba(0,0,0,.4);
-  pointer-events:auto;
+  pointer-events:auto;touch-action:none;
 }
 .selbox i:hover{transform:scale(1.25)}
+/* fingers need a bigger target than a 12px square */
+@media (pointer:coarse){
+  .selbox i{width:16px;height:16px}
+  .selbox i::after{content:"";position:absolute;inset:-12px}
+}
 .selbox i[data-h="nw"]{left:-6px;top:-6px;cursor:nwse-resize}
 .selbox i[data-h="n"]{left:50%;top:-6px;margin-left:-6px;cursor:ns-resize}
 .selbox i[data-h="ne"]{right:-6px;top:-6px;cursor:nesw-resize}
@@ -1235,7 +1244,7 @@ img{max-width:100%;display:block}
     <div class="hd" style="max-width:none">
       <span class="eyebrow">ขั้นที่ 6 · Your portfolio</span>
       <h1>พอร์ตโฟลิโอของคุณ</h1>
-      <p class="sub">14 หน้า พร้อมพิมพ์ขนาด A4 — แก้ไขได้ทันที คลิกเพื่อเลือก ลากเพื่อย้าย ลากมุมขวาล่างเพื่อย่อ–ขยาย และดับเบิลคลิกเพื่อพิมพ์ทับข้อความ ข้อความที่แก้จะอัปเดตกลับไปยังหน้ากรอกข้อมูลด้วย</p>
+      <p class="sub">14 หน้า พร้อมพิมพ์ขนาด A4 — แก้ไขได้ทันที คลิกเพื่อเลือก ลากเพื่อย้าย ลากจุดรอบกรอบเพื่อย่อ–ขยาย และดับเบิลคลิกเพื่อพิมพ์ทับข้อความ ข้อความที่แก้จะอัปเดตกลับไปยังหน้ากรอกข้อมูลด้วย<br><span class="en">บนมือถือ: แตะหนึ่งครั้งเพื่อเลือกก่อน แล้วจึงลากเพื่อย้าย — เลื่อนหน้าจอได้ตามปกติ</span></p>
     </div>
 
     <div class="work">
@@ -2288,6 +2297,7 @@ img{max-width:100%;display:block}
     ev.preventDefault();
     ev.stopPropagation();
     commitEdit();
+    try{ ev.target.setPointerCapture(ev.pointerId); }catch(_e){}
     makeMovable(sel);
     var e = sel;
     var k = e.dataset.ek;
@@ -2331,11 +2341,13 @@ img{max-width:100%;display:block}
     function up(){
       window.removeEventListener("pointermove", mv);
       window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", up);
       positionBar();
       pushHist();
     }
     window.addEventListener("pointermove", mv);
     window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
   }
 
   function initEditor(){
@@ -2347,9 +2359,18 @@ img{max-width:100%;display:block}
       // block's own space, get the block
       var e = ev.target.closest("[data-ek]");
       if(!e){ deselect(); return; }
-      ev.preventDefault();
       commitEdit();
+
+      // On touch the first contact only selects, so this gesture is still free
+      // to scroll the page; the component becomes draggable once it is
+      // selected. A mouse or pen keeps select-and-drag in one motion.
+      var byTouch = ev.pointerType === "touch";
+      var already = (sel === e);
       select(e);
+      if(byTouch && !already) return;
+
+      ev.preventDefault();
+      try{ e.setPointerCapture(ev.pointerId); }catch(_e){}
 
       var sheet = e.closest(".sheet");
       var w = sheet.getBoundingClientRect().width || 1;
@@ -2366,11 +2387,14 @@ img{max-width:100%;display:block}
       function up(){
         window.removeEventListener("pointermove", mv);
         window.removeEventListener("pointerup", up);
+        window.removeEventListener("pointercancel", up);
+        try{ e.releasePointerCapture(ev.pointerId); }catch(_e){}
         positionBar();
         pushHist();
       }
       window.addEventListener("pointermove", mv);
       window.addEventListener("pointerup", up);
+      window.addEventListener("pointercancel", up);
     });
 
     host.addEventListener("dblclick", function(ev){
