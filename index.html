@@ -264,6 +264,29 @@ img{max-width:100%;display:block}
 .up-body .nm{font-size:12.5px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .up input[type=file]{display:none}
 
+/* multi-photo picker */
+.upm{
+  background:var(--surface-2);border:2px dashed var(--line);border-radius:var(--r-m);
+  padding:12px;display:flex;flex-direction:column;gap:10px;transition:border-color .15s;
+}
+.upm:hover{border-color:var(--mint)}
+.upm input[type=file]{display:none}
+.upm-grid{display:flex;flex-wrap:wrap;gap:8px}
+.upm-thumb{
+  position:relative;width:74px;height:74px;border-radius:11px;overflow:hidden;
+  border:1px solid var(--line);background:var(--bg-2);flex:none;
+}
+.upm-thumb img{width:100%;height:100%;object-fit:cover}
+.upm-x{
+  position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;
+  border:0;background:rgba(22,32,58,.72);color:#fff;cursor:pointer;font-size:11px;
+  display:grid;place-items:center;line-height:1;padding:0;
+}
+.upm-x:hover{background:var(--brand)}
+.upm-empty{font-size:12.5px;color:var(--muted);align-self:center;padding:6px 2px}
+.upm-bar{display:flex;align-items:center;gap:10px}
+.upm-count{font-family:var(--ui);font-size:12px;color:var(--muted)}
+
 /* repeatable entry cards */
 .entry{border:1px solid var(--line);border-radius:var(--r-m);padding:15px;background:var(--surface-2);margin-bottom:13px}
 .entry:last-of-type{margin-bottom:0}
@@ -357,6 +380,9 @@ img{max-width:100%;display:block}
 .faccard-name{
   position:relative;z-index:2;font-size:26px;letter-spacing:.01em;text-align:center;padding:0 12px;
   line-height:1.1;
+  /* fixed, never themed: the card tops are their own light colours, so this
+     word must stay dark in both light and dark mode */
+  color:#16121a;
 }
 .faccard-bd{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px;text-align:left}
 .faccard-bd .h3{display:block;font-family:var(--ui);font-weight:500;font-size:16px;line-height:1.3}
@@ -472,8 +498,42 @@ img{max-width:100%;display:block}
 .dl-go:active{transform:translateY(3px);box-shadow:0 0 0 var(--brand-deep)}
 .dl-go[disabled]{opacity:.6;cursor:progress;transform:none}
 
-.stage{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--r-m);padding:clamp(10px,1.8vw,24px);overflow:hidden}
+.stage{
+  background:var(--bg-2);border:1px solid var(--line);border-radius:var(--r-m);
+  padding:clamp(10px,1.8vw,24px);overflow:hidden;position:relative;
+}
 .sheets{display:flex;flex-direction:column;gap:clamp(14px,2vw,26px);align-items:center}
+
+/* One page at a time. Every sheet stays in the DOM — hiding is presentation
+   only — so printing and export still produce the whole 14-page book. */
+.sheets[data-single="1"] > .sheetbox{display:none}
+.sheets[data-single="1"] > .sheetbox[data-cur="1"]{display:block}
+
+.pageind{
+  position:absolute;top:12px;right:12px;z-index:5;
+  display:flex;align-items:baseline;gap:7px;
+  background:var(--surface);border:1px solid var(--line);border-radius:999px;
+  padding:6px 14px;box-shadow:var(--sh-1);font-family:var(--ui);
+}
+.pageind b{font-size:15px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+.pageind span{font-size:12px;color:var(--muted)}
+.pageind em{font-style:normal;font-size:12px;color:var(--ink-2);max-width:22ch;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+
+/* page turners: bare chevrons at the screen edges, no plate behind them */
+.pager{
+  position:fixed;top:50%;transform:translateY(-50%);z-index:56;
+  width:54px;height:88px;border:0;background:transparent;padding:0;
+  color:var(--ink);display:grid;place-items:center;cursor:pointer;
+  opacity:.5;transition:opacity .15s ease;
+}
+.pager:hover{opacity:1}
+.pager:active svg{transform:scale(.88)}
+.pager[disabled]{opacity:.12;cursor:default}
+.pager[hidden]{display:none}
+.pager-prev{left:4px}
+.pager-next{right:4px}
+@media (max-width:640px){ .pager{width:40px;height:70px} }
 .sheetbox{width:100%;max-width:820px;position:relative}
 .sheetbox .cap{
   font-family:var(--ui);font-size:11.5px;color:var(--muted);letter-spacing:.04em;
@@ -670,6 +730,11 @@ img{max-width:100%;display:block}
 .cap-lab{font-style:normal;font-weight:600;color:var(--f-muted)}
 .cap-learn .cap-lab{color:var(--f-accent)}
 .pgrid{display:grid;gap:1.7cqw}
+/* several photos for one entry */
+.ph-multi{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8cqw}
+.ph-multi .ph{aspect-ratio:1/1}
+.ph-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1.1cqw}
+.ph-strip .ph{aspect-ratio:4/3}
 
 /* quote / motto */
 .quote{
@@ -800,7 +865,10 @@ img{max-width:100%;display:block}
 
 /* ---------- print ---------- */
 @media print{
-  .ambient,.topbar,.toolbar,.dlmenu,.rail,.msg,.elbar,.selbox,.sheetbox .cap{display:none !important}
+  .ambient,.topbar,.toolbar,.dlmenu,.rail,.msg,.elbar,.selbox,.pager,.pageind,
+  .sheetbox .cap{display:none !important}
+  /* the single-page view is for the screen only — paper gets every page */
+  .sheets[data-single="1"] > .sheetbox{display:block !important}
   body{background:#fff}
   .screen{display:none !important}
   #screen7[data-on="1"]{display:block !important;padding:0}
@@ -1173,7 +1241,10 @@ img{max-width:100%;display:block}
     <div class="work">
       <nav class="rail" id="rail" aria-label="หน้าในเล่ม"></nav>
       <div class="stage">
-        <div class="sheets" id="sheets"></div>
+        <div class="pageind" id="pageind" aria-live="polite">
+          <b id="pageNow">1</b><span id="pageTotal">/ 14</span><em id="pageName"></em>
+        </div>
+        <div class="sheets" id="sheets" data-single="1"></div>
       </div>
     </div>
   </div>
@@ -1210,6 +1281,15 @@ img{max-width:100%;display:block}
       <path d="M12 3v12M7 11l5 5 5-5M4 20h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </button>
 </div>
+
+<button class="pager pager-prev" id="pagePrev" type="button" hidden title="หน้าก่อนหน้า" aria-label="หน้าก่อนหน้า">
+  <svg width="34" height="34" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M15 4l-8 8 8 8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</button>
+<button class="pager pager-next" id="pageNext" type="button" hidden title="หน้าถัดไป" aria-label="หน้าถัดไป">
+  <svg width="34" height="34" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M9 4l8 8-8 8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</button>
 
 <div class="dlmenu" id="dlmenu" hidden role="dialog" aria-label="ตัวเลือกการดาวน์โหลด">
   <div class="dl-row">
@@ -1346,27 +1426,27 @@ img{max-width:100%;display:block}
   var FACULTIES = {
     engineering:{ th:"วิศวกรรมศาสตร์", en:"Engineering",
       sw:["#c62828","#37474f","#e2e6e9","#ffffff"], accent:"#c62828",
-      cardBg:"#fff5f5", cardWord:"#c62828", font:'"Chakra Petch","Sarabun",sans-serif',
+      cardBg:"#fff5f5", font:'"Chakra Petch","Sarabun",sans-serif',
       blurb:"แดงเข้มบนกระดาษกริด ฟอนต์เหลี่ยม อ่านเหมือนแบบร่างทางเทคนิค" },
     fineArts:{ th:"ศิลปกรรมศาสตร์", en:"Fine &amp; Applied Arts",
       sw:["#16897b","#f2a03d","#e3ebe6","#fffdfa"], accent:"#16897b",
-      cardBg:"#eef7f4", cardWord:"#16897b", font:'"Trirong","Sarabun",serif',
+      cardBg:"#eef7f4", font:'"Trirong","Sarabun",serif',
       blurb:"เขียวมิ้นต์กับส้มอิฐ ตัวอักษรมีหัวเซอริฟ วางแบบสูจิบัตรนิทรรศการ" },
     business:{ th:"บริหารธุรกิจ", en:"Business Administration",
       sw:["#b8912f","#2f3a4a","#ece5d6","#fffdf7"], accent:"#b8912f",
-      cardBg:"#fdf9f0", cardWord:"#22201c", font:'"Trirong","Sarabun",serif',
+      cardBg:"#fdf9f0", font:'"Trirong","Sarabun",serif',
       blurb:"ทองกับครีม เส้นโค้งบาง ๆ ให้ความรู้สึกเหมือนรายงานประจำปี" },
     architecture:{ th:"สถาปัตยกรรมศาสตร์", en:"Architecture",
       sw:["#2f5d8c","#7a8fa1","#dee5eb","#fbfcfd"], accent:"#2f5d8c",
-      cardBg:"#eef3f8", cardWord:"#2f5d8c", font:'"Bai Jamjuree","Sarabun",sans-serif',
+      cardBg:"#eef3f8", font:'"Bai Jamjuree","Sarabun",sans-serif',
       blurb:"น้ำเงินพิมพ์เขียว เส้นบาง กรอบกระดาษเขียนแบบ ทุกอย่างเข้ากริด" },
     commArts:{ th:"นิเทศศาสตร์", en:"Communication Arts",
       sw:["#e5326b","#ffc24b","#16121a","#ffffff"], accent:"#e5326b",
-      cardBg:"#16121a", cardWord:"#ffffff", font:'"Kanit","Sarabun",sans-serif',
+      cardBg:"#fdeef3", font:'"Kanit","Sarabun",sans-serif',
       blurb:"ปกดำตัวหนา ชมพูจัดกับเหลือง อ่านออกตั้งแต่ยังไม่หยิบเล่ม" },
     science:{ th:"วิทยาศาสตร์", en:"Science",
       sw:["#0e7c6b","#4aa3df","#dfeae7","#fcfefd"], accent:"#0e7c6b",
-      cardBg:"#f2faf8", cardWord:"#0e7c6b", font:'"IBM Plex Sans Thai","Sarabun",sans-serif',
+      cardBg:"#f2faf8", font:'"IBM Plex Sans Thai","Sarabun",sans-serif',
       blurb:"เขียวห้องแล็บ หัวข้อใส่เลขลำดับ จัดหน้าแบบบทความวิชาการ" }
   };
   var FKEYS = ["engineering","fineArts","business","architecture","commArts","science"];
@@ -1387,8 +1467,14 @@ img{max-width:100%;display:block}
   };
   var state = { screen:1, faculty:"engineering", edits:{}, cur:0 };
 
-  function blankAct(){ return {title:"",type:"ค่ายวิชาการ",date:"",role:"",desc:"",learned:"",photo:""}; }
-  function blankWork(){ return {name:"",objective:"",tools:"",role:"",desc:"",photo:""}; }
+  function blankAct(){ return {title:"",type:"ค่ายวิชาการ",date:"",role:"",desc:"",learned:"",photos:[]}; }
+  function blankWork(){ return {name:"",objective:"",tools:"",role:"",desc:"",photos:[]}; }
+  /* tolerate the older single-photo shape as well as the current list */
+  function photosOf(o){
+    if(!o) return [];
+    if(Array.isArray(o.photos)) return o.photos;
+    return o.photo ? [o.photo] : [];
+  }
   function blankCert(){ return {name:"",level:"ระดับประเทศ",date:"",photo:""}; }
 
   /* ==========================================================
@@ -1433,6 +1519,15 @@ img{max-width:100%;display:block}
   function ph(src, label, cls){
     if(src) return '<div class="ph '+cls+'"><img src="'+src+'" alt=""></div>';
     return '<div class="ph empty '+cls+'"><span>'+esc(label)+"</span></div>";
+  }
+  /* One photo fills the frame; several are laid out as a small grid so a whole
+     activity or project reads as one block on the page. */
+  function phBlock(arr, label, cls, max){
+    if(!arr.length) return ph("", label, cls);
+    if(arr.length === 1) return ph(arr[0], label, cls);
+    return '<div class="ph-multi">'+arr.slice(0, max || 4).map(function(s){
+      return '<div class="ph"><img src="'+s+'" alt=""></div>';
+    }).join("")+"</div>";
   }
 
   /* ==========================================================
@@ -1598,7 +1693,7 @@ img{max-width:100%;display:block}
   function actCard(a){
     var i = D.acts.indexOf(a);
     return el("phbox",
-      ph(a.photo,"พื้นที่สำหรับรูปกิจกรรม","ph-4x3")+
+      phBlock(photosOf(a),"พื้นที่สำหรับรูปกิจกรรม","ph-4x3",4)+
       '<div class="cap"><b'+bind("acts."+i+".title")+">"+or(a.title,"ชื่อกิจกรรม")+"</b>"+
       (has(a.date)||has(a.type) ? '<span class="p-micro cap-line">'+
         esc([tidy(a.type),tidy(a.date)].filter(Boolean).join(" · "))+"</span>" : "")+
@@ -1624,12 +1719,12 @@ img{max-width:100%;display:block}
   var CAMP = ["ค่ายวิชาการ","ฝึกงาน","การแข่งขัน"];
   function sActs(){
     return actPage(6,"กิจกรรมและค่ายวิชาการ","Activities &amp; Camps",
-      D.acts.filter(function(a){ return CAMP.indexOf(a.type)>=0 && (has(a.title)||a.photo); }),
+      D.acts.filter(function(a){ return CAMP.indexOf(a.type)>=0 && (has(a.title)||photosOf(a).length); }),
       "ค่าย ฝึกงาน หรือการแข่งขันที่เกี่ยวข้องกับสาขา");
   }
   function sVol(){
     return actPage(7,"งานอาสาและกิจกรรมโรงเรียน","Volunteering &amp; School Life",
-      D.acts.filter(function(a){ return CAMP.indexOf(a.type)<0 && (has(a.title)||a.photo); }),
+      D.acts.filter(function(a){ return CAMP.indexOf(a.type)<0 && (has(a.title)||photosOf(a).length); }),
       "งานอาสา หรือบทบาทในกิจกรรมของโรงเรียน");
   }
 
@@ -1637,7 +1732,16 @@ img{max-width:100%;display:block}
     var w = (D.works||[])[0] || blankWork();
     return '<div class="s-body">'+head(8,"ผลงานเด่น","Highlight Project")+
       '<div class="p-rows p-fill">'+
-        el("ph-wrap", ph(w.photo,"พื้นที่สำหรับภาพผลงาน","ph-16x9"))+
+        el("ph-wrap", (function(){
+          var ps = photosOf(w);
+          // lead image large, the rest as a strip beneath it
+          var main = ph(ps[0] || "", "พื้นที่สำหรับภาพผลงาน", "ph-16x9");
+          if(ps.length < 2) return main;
+          return main + '<div class="ph-strip" style="margin-top:1.1cqw">'+
+            ps.slice(1, 5).map(function(s){
+              return '<div class="ph"><img src="'+s+'" alt=""></div>';
+            }).join("")+"</div>";
+        })())+
         el("p-card",
           '<div'+bind("works.0.name")+' style="font-family:var(--f-display);font-size:3cqw;font-weight:600;line-height:1.25;margin-bottom:1cqw">'+
             or(w.name,"ชื่อผลงาน")+"</div>"+
@@ -1652,13 +1756,13 @@ img{max-width:100%;display:block}
   }
 
   function sWorks(){
-    var ws = (D.works||[]).slice(1).filter(function(w){ return has(w.name)||w.photo; });
+    var ws = (D.works||[]).slice(1).filter(function(w){ return has(w.name)||photosOf(w).length; });
     var body;
     if(ws.length){
       body = '<div class="pgrid p-fill" style="grid-template-columns:repeat(2,minmax(0,1fr))">'+
         ws.slice(0,4).map(function(w){
           var wi = D.works.indexOf(w);
-          return el("phbox", ph(w.photo,"พื้นที่สำหรับภาพผลงาน","ph-4x3")+
+          return el("phbox", phBlock(photosOf(w),"พื้นที่สำหรับภาพผลงาน","ph-4x3",4)+
             '<div class="cap"><b'+bind("works."+wi+".name")+">"+or(w.name,"ชื่อผลงาน")+"</b>"+
             (has(w.tools)?'<span class="p-micro cap-line"'+bind("works."+wi+".tools")+">"+esc(tidy(w.tools))+"</span>":"")+
             (has(w.role)?'<span class="cap-line"><em class="cap-lab">บทบาท:</em> <span'+bind("works."+wi+".role")+">"+esc(tidy(w.role))+"</span></span>":"")+
@@ -1762,7 +1866,29 @@ img{max-width:100%;display:block}
     });
     applyEdits();
     renderRail();
+    showPage(state.cur);
   }
+
+  /* ---------- one page at a time ---------- */
+  function showPage(i){
+    var boxes = $$("#sheets .sheetbox");
+    if(!boxes.length) return;
+    state.cur = Math.max(0, Math.min(boxes.length - 1, i || 0));
+    boxes.forEach(function(b, n){
+      if(n === state.cur) b.setAttribute("data-cur","1");
+      else b.removeAttribute("data-cur");
+    });
+    var p = PAGES[state.cur] || {};
+    $("#pageNow").textContent = state.cur + 1;
+    $("#pageTotal").textContent = "/ " + boxes.length;
+    $("#pageName").textContent = p.label || "";
+    var prev = $("#pagePrev"), next = $("#pageNext");
+    if(prev) prev.disabled = state.cur === 0;
+    if(next) next.disabled = state.cur === boxes.length - 1;
+    renderRail();
+    deselect();          // the previous selection may now be off-screen
+  }
+  function turnPage(step){ showPage(state.cur + step); }
 
   /* ---------- undo / redo ----------
      A step captures both the page edits and the form data, because retyping a
@@ -1909,6 +2035,22 @@ img{max-width:100%;display:block}
      movable, scalable and able to carry the resize grip. */
   function makeMovable(e){
     if(e && getComputedStyle(e).display === "inline") e.style.display = "inline-block";
+  }
+
+  /* An element's translate is measured in ITS OWN coordinate space, so if any
+     ancestor has been scaled up, one unit of translate covers more screen
+     pixels and the component runs ahead of the cursor. Divide the pointer
+     delta by the ancestors' combined scale to keep it under the mouse. */
+  function ancestorScale(el, sheet){
+    var s = 1, n = el.parentElement;
+    while(n && n !== sheet){
+      if(n.hasAttribute && n.hasAttribute("data-ek")){
+        var st = state.edits[n.dataset.ek];
+        if(st && st.s) s *= st.s;
+      }
+      n = n.parentElement;
+    }
+    return s || 1;
   }
   function applyEdits(){
     $$("#sheets [data-ek]").forEach(function(e){
@@ -2153,7 +2295,8 @@ img{max-width:100%;display:block}
     var sheet = e.closest(".sheet");
     var W = sheet ? (sheet.getBoundingClientRect().width || 1) : 1;
     var r = e.getBoundingClientRect();
-    var sc = st.s === undefined ? 1 : st.s;        // uniform scale already on it
+    var asc = ancestorScale(e, sheet);             // scaled ancestors move faster
+    var sc = (st.s === undefined ? 1 : st.s) * asc;
     var curW = r.width / sc, curH = r.height / sc; // untransformed box, in px
     var x0 = st.x || 0, y0 = st.y || 0;
     var startX = ev.clientX, startY = ev.clientY;
@@ -2172,12 +2315,12 @@ img{max-width:100%;display:block}
       var nx = x0, ny = y0;
       if(horiz){
         var w = dir.indexOf("w") >= 0 ? curW - dx : curW + dx;
-        if(dir.indexOf("w") >= 0) nx = x0 + (m.clientX - startX) / W * 100;
+        if(dir.indexOf("w") >= 0) nx = x0 + (m.clientX - startX) / asc / W * 100;
         st.w = clamp(w, 10, 4000) / W * 100;
       }
       if(vert){
         var h = dir.indexOf("n") >= 0 ? curH - dy : curH + dy;
-        if(dir.indexOf("n") >= 0) ny = y0 + (m.clientY - startY) / W * 100;
+        if(dir.indexOf("n") >= 0) ny = y0 + (m.clientY - startY) / asc / W * 100;
         st.h = clamp(h, 10, 4000) / W * 100;
       }
       st.x = nx; st.y = ny;
@@ -2212,10 +2355,11 @@ img{max-width:100%;display:block}
       var w = sheet.getBoundingClientRect().width || 1;
       var k = e.dataset.ek;
       var st = state.edits[k] = state.edits[k] || {x:0,y:0};
+      var asc = ancestorScale(e, sheet);
       var sx = ev.clientX, sy = ev.clientY, ox = st.x||0, oy = st.y||0;
       function mv(m){
-        st.x = ox + (m.clientX - sx)/w*100;
-        st.y = oy + (m.clientY - sy)/w*100;
+        st.x = ox + (m.clientX - sx)/asc/w*100;
+        st.y = oy + (m.clientY - sy)/asc/w*100;
         e.style.transform = transformOf(st);
         positionBar();
       }
@@ -2300,10 +2444,15 @@ img{max-width:100%;display:block}
     $("#rail").addEventListener("click", function(ev){
       var b = ev.target.closest("[data-th]");
       if(!b) return;
-      state.cur = Number(b.dataset.th);
-      renderRail();
-      var box = $$("#sheets .sheetbox")[state.cur];
-      if(box) box.scrollIntoView({behavior:"smooth", block:"start"});
+      showPage(Number(b.dataset.th));
+    });
+    $("#pagePrev").addEventListener("click", function(){ turnPage(-1); });
+    $("#pageNext").addEventListener("click", function(){ turnPage(1); });
+    document.addEventListener("keydown", function(ev){
+      if(state.screen !== 7 || editing) return;
+      if(ev.target && /^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName)) return;
+      if(ev.key === "ArrowLeft"){ ev.preventDefault(); turnPage(-1); }
+      else if(ev.key === "ArrowRight"){ ev.preventDefault(); turnPage(1); }
     });
   }
 
@@ -2340,6 +2489,8 @@ img{max-width:100%;display:block}
       });
     $$(".sheet", clone).forEach(function(s){ s.classList.remove("is-edit"); });
     $$(".cap", clone).forEach(function(c){ if(c.parentNode.classList.contains("sheetbox")) c.remove(); });
+    clone.removeAttribute("data-single");                       // export shows every page
+    $$(".sheetbox", clone).forEach(function(b){ b.removeAttribute("data-cur"); });
 
     var css = $("#pf-css").textContent + "\n" + $("#fac-css").textContent;
     var nm = tidy(D.nameTh) || tidy(D.nameEn) || "Portfolio";
@@ -2421,13 +2572,8 @@ img{max-width:100%;display:block}
   }
 
   function visibleSheet(){
-    var mid = window.innerHeight / 2, best = null, bd = Infinity;
-    $$("#sheets .sheet").forEach(function(s){
-      var r = s.getBoundingClientRect();
-      var d = Math.abs((r.top + r.bottom) / 2 - mid);
-      if(d < bd){ bd = d; best = s; }
-    });
-    return best || $("#sheets .sheet");
+    var box = $$("#sheets .sheetbox")[state.cur];
+    return (box && box.querySelector(".sheet")) || $("#sheets .sheet");
   }
 
   function sheetToBlob(sheet, mime){
@@ -2674,6 +2820,62 @@ img{max-width:100%;display:block}
     return '<textarea data-list="'+list+'" data-i="'+i+'" data-f="'+f+
       '" placeholder="'+PH+'">'+esc(val)+"</textarea>";
   }
+  /* multi-photo picker: one activity or one project can carry several images */
+  function upMulti(list,i,label){
+    return '<div class="upm" data-upm="'+list+'" data-i="'+i+'">'+
+      '<div class="upm-grid"></div>'+
+      '<div class="upm-bar">'+
+        '<button type="button" class="btn btn-sm upm-pick">'+esc(label)+"</button>"+
+        '<span class="upm-count"></span>'+
+      "</div>"+
+      '<input type="file" accept="image/*" multiple></div>';
+  }
+
+  function paintPhotos(box){
+    var list = box.dataset.upm, i = Number(box.dataset.i);
+    var arr = photosOf(D[list] && D[list][i]);
+    $(".upm-grid", box).innerHTML = arr.length
+      ? arr.map(function(src, pi){
+          return '<span class="upm-thumb"><img src="'+src+'" alt="">'+
+            '<button type="button" class="upm-x" data-pi="'+pi+'" title="ลบรูปนี้" aria-label="ลบรูปนี้">✕</button></span>';
+        }).join("")
+      : '<span class="upm-empty">ยังไม่ได้เพิ่มรูป</span>';
+    $(".upm-count", box).textContent = arr.length ? arr.length + " รูป" : "";
+  }
+
+  function wireMulti(list){
+    $$('.upm[data-upm="'+list+'"]').forEach(function(box){
+      var i = Number(box.dataset.i);
+      var input = $("input[type=file]", box);
+      $(".upm-pick", box).addEventListener("click", function(){ input.click(); });
+      input.addEventListener("change", function(){
+        var files = Array.prototype.slice.call(input.files || []);
+        input.value = "";
+        if(!files.length) return;
+        var item = D[list][i];
+        if(!item) return;
+        if(!Array.isArray(item.photos)) item.photos = photosOf(item);
+        var pending = files.length;
+        files.forEach(function(f){
+          readImage(f, false, function(src){
+            if(src) item.photos.push(src);
+            if(--pending === 0) paintPhotos(box);
+          });
+        });
+      });
+      box.addEventListener("click", function(ev){
+        var x = ev.target.closest(".upm-x");
+        if(!x) return;
+        var item = D[list][i];
+        if(!item) return;
+        if(!Array.isArray(item.photos)) item.photos = photosOf(item);
+        item.photos.splice(Number(x.dataset.pi), 1);
+        paintPhotos(box);
+      });
+      paintPhotos(box);
+    });
+  }
+
   function upBox(list,i,label){
     return '<div class="up" data-up="item" data-list="'+list+'" data-i="'+i+'">'+
       '<div class="up-prev"><span>รูป</span></div><div class="up-body">'+
@@ -2742,10 +2944,10 @@ img{max-width:100%;display:block}
           '<div class="fld"><label>บทบาทของคุณ</label>'+inp("acts",i,"role",a.role)+"</div>"+
           '<div class="fld span2"><label>รายละเอียดสั้น ๆ</label>'+txa("acts",i,"desc",a.desc)+"</div>"+
           '<div class="fld span2"><label>สิ่งที่ได้เรียนรู้</label>'+txa("acts",i,"learned",a.learned)+"</div>"+
-          '<div class="fld span2"><label>รูปกิจกรรม</label>'+upBox("acts",i,"เลือกรูป")+"</div>"+
+          '<div class="fld span2"><label>รูปกิจกรรม <span class="en">· ใส่ได้หลายรูป</span></label>'+upMulti("acts",i,"+ เพิ่มรูป")+"</div>"+
         "</div></div>";
     }).join("");
-    wireItemUploads("acts");
+    wireMulti("acts");
   }
   function renderWorks(){
     $("#workList").innerHTML = D.works.map(function(w,i){
@@ -2757,10 +2959,10 @@ img{max-width:100%;display:block}
           '<div class="fld"><label>โปรแกรม / เครื่องมือที่ใช้</label>'+inp("works",i,"tools",w.tools)+"</div>"+
           '<div class="fld"><label>บทบาทของคุณ</label>'+inp("works",i,"role",w.role)+"</div>"+
           '<div class="fld span2"><label>รายละเอียด</label>'+txa("works",i,"desc",w.desc)+"</div>"+
-          '<div class="fld span2"><label>ภาพผลงาน</label>'+upBox("works",i,"เลือกรูป")+"</div>"+
+          '<div class="fld span2"><label>ภาพผลงาน <span class="en">· ใส่ได้หลายรูป</span></label>'+upMulti("works",i,"+ เพิ่มรูป")+"</div>"+
         "</div></div>";
     }).join("");
-    wireItemUploads("works");
+    wireMulti("works");
   }
   var CERT_LV = ["ระดับประเทศ","ระดับภาค","ระดับจังหวัด","ระดับโรงเรียน","อื่น ๆ"];
   function renderCerts(){
@@ -2829,6 +3031,8 @@ img{max-width:100%;display:block}
     if(t) t.setAttribute("data-on","1");
     $("#topbar").hidden = (n===1);
     $("#toolbar").hidden = (n!==7);
+    $("#pagePrev").hidden = (n!==7);
+    $("#pageNext").hidden = (n!==7);
     renderSteps();
     window.scrollTo(0,0);
     if(n===7){ renderBook(); pushHist(); }
@@ -2841,12 +3045,18 @@ img{max-width:100%;display:block}
         '<span class="faccard-tick"><svg width="15" height="15" viewBox="0 0 24 24" fill="none">'+
           '<path d="M5 12.5l5 5 9-10" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'+
         '<span class="faccard-top" style="background:'+F.cardBg+'">'+MOTIF[k].cover+
-          '<span class="faccard-name" style="font-family:'+F.font+';color:'+F.cardWord+'">PORTFOLIO</span></span>'+
+          '<span class="faccard-name">PORTFOLIO</span></span>'+
         '<span class="faccard-bd"><span class="h3">'+F.th+'</span><span class="th">'+F.en+"</span>"+
           '<span class="p">'+F.blurb+"</span>"+
           '<span class="faccard-sw">'+F.sw.map(function(c){ return '<i style="background:'+c+'"></i>'; }).join("")+
         "</span></span></button>";
     }).join("");
+    // Typeface goes through the CSSOM rather than an inline style attribute:
+    // the font stacks contain double quotes, which close style="..." early and
+    // silently discard every declaration after them.
+    $$(".faccard").forEach(function(c){
+      c.querySelector(".faccard-name").style.fontFamily = FACULTIES[c.dataset.f].font;
+    });
   }
 
   /* ==========================================================
