@@ -2632,7 +2632,6 @@ img{max-width:100%;display:block}
     $("#btnReset").addEventListener("click", function(){
       state.edits = {}; state.dupes = []; deselect(); renderBook();
       pushHist();
-      msg("คืนค่าทุกหน้ากลับเป็นแบบเดิมแล้ว","ok");
     });
     /* "input" fires on every keystroke and on every spinner step, so it only
        previews; "change" fires when the value settles and is what commits one
