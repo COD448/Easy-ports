@@ -454,14 +454,14 @@ img{max-width:100%;display:block}
 /* Floating tool pill — sits outside the animated screens so position:fixed
    resolves against the viewport, and follows the page as it scrolls. */
 .toolbar{
-  position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:58;
-  display:flex;align-items:center;gap:4px;
+  position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:58;
+  display:flex;align-items:center;gap:2px;
   background:var(--surface);border:1px solid var(--line);border-radius:999px;
-  padding:5px 8px;box-shadow:var(--sh-2);
+  padding:4px 6px;box-shadow:var(--sh-2);
 }
 .toolbar[hidden]{display:none}
 .toolbar button{
-  width:36px;height:36px;border-radius:50%;border:0;background:transparent;color:var(--ink);
+  width:32px;height:32px;border-radius:50%;border:0;background:transparent;color:var(--ink);
   display:grid;place-items:center;cursor:pointer;
   transition:background .15s ease,color .15s ease,transform .12s ease;
 }
@@ -469,26 +469,26 @@ img{max-width:100%;display:block}
 .toolbar button:active{transform:translateY(1px)}
 .toolbar button[disabled]{opacity:.32;cursor:not-allowed;transform:none}
 .toolbar button[disabled]:hover{background:transparent;transform:none}
-.toolbar .sep{width:1px;height:20px;background:var(--line);margin:0 3px;flex:none}
+.toolbar .sep{width:1px;height:18px;background:var(--line);margin:0 2px;flex:none}
 /* the icons are authored at 20px in the markup; the bar is more compact than
    that, so they are scaled down here rather than in seven separate tags */
-.toolbar button svg{width:18px;height:18px}
+.toolbar button svg{width:16px;height:16px}
 /* Type-size field. It shares the pill with the icon buttons, so it takes their
    height but reads as a recessed well rather than a raised button face. It is
    dimmed rather than removed when the selection has no type size to set, so
    the toolbar never changes width under the cursor. */
 .toolbar .tsize{
-  display:flex;align-items:center;gap:2px;height:36px;padding:0 10px;flex:none;
+  display:flex;align-items:center;gap:1px;height:32px;padding:0 7px;flex:none;
   border-radius:999px;background:var(--surface-2);
-  font-family:var(--ui);font-size:11.5px;color:var(--muted);
+  font-family:var(--ui);font-size:10.5px;color:var(--muted);
   transition:opacity .15s ease,box-shadow .15s ease;
 }
 .toolbar .tsize[data-off="1"]{opacity:.4}
 .toolbar .tsize:focus-within{box-shadow:0 0 0 2px var(--brand) inset}
-.toolbar .tsize-ic{font-size:14px;font-weight:600;color:var(--ink);line-height:1}
+.toolbar .tsize-ic{font-size:12px;font-weight:600;color:var(--ink);line-height:1}
 .toolbar .tsize input{
-  width:38px;border:0;background:transparent;color:var(--ink);padding:0;
-  font-family:var(--ui);font-size:13px;font-weight:600;text-align:right;
+  width:30px;border:0;background:transparent;color:var(--ink);padding:0;
+  font-family:var(--ui);font-size:12px;font-weight:600;text-align:right;
   font-variant-numeric:tabular-nums;
 }
 .toolbar .tsize input:focus{outline:none}
@@ -499,7 +499,13 @@ img{max-width:100%;display:block}
 .toolbar .primary{background:var(--brand);color:#fff}
 .toolbar .primary:hover{background:var(--brand);color:#fff;filter:brightness(1.08)}
 @media (max-width:520px){
-  .toolbar button{width:38px;height:38px}
+  /* The bar has to clear a 360px phone. The buttons are already at the smallest
+     size that is still comfortable to tap, so the squeeze comes out of the
+     spacing and the size field — the widest single item in the bar — instead. */
+  .toolbar{gap:1px;padding:4px 5px}
+  .toolbar .sep{margin:0 1px}
+  .toolbar .tsize{padding:0 5px}
+  .toolbar .tsize input{width:26px}
 }
 
 /* download options, anchored above the download button */
